@@ -1,0 +1,12 @@
+meters:
+  - id: meter_01
+    label: "Mesin Injeksi 1"
+    port: /dev/ttyACM5
+    baudrate: 9600
+    slave_id: 1
+    parity: N
+    stopbits: 1
+    gpio_pin: 3
+    gpio_debounce_ms: 50
+
+

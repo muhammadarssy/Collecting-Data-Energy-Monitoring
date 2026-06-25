@@ -1,0 +1,17 @@
+pymodbus>=3.6,<4.0
+asyncpg>=0.29
+pydantic-settings>=2.0
+PyYAML>=6.0
+structlog>=24.1
+RPi.GPIO==0.7.1
+
+# GPIO — rpi-lgpio adalah drop-in replacement RPi.GPIO (import tetap sama).
+# Wajib di Pi OS Bookworm / kernel 6.6+; RPi.GPIO klasik gagal add_event_detect.
+#
+# Cara A — DISARANKAN (via apt):
+#   sudo apt remove python3-rpi.gpio
+#   sudo apt install python3-rpi-lgpio
+#
+# Cara B — via pip:
+#   pip install rpi-lgpio
+# rpi-lgpio>=0.6; platform_machine == "armv7l" or platform_machine == "aarch64"

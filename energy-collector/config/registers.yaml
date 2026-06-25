@@ -1,0 +1,348 @@
+# Register map DTSU666 — shared untuk semua meter.
+# Strategi baca: 2 request per polling cycle
+#   Request 1: 0x2000–0x2051 (electrical measurements)
+#   Request 2: 0x401E–0x4059 (energy)
+# Device info (int16) dibaca sekali saat startup.
+
+registers:
+
+  # ── Voltage L-L ──────────────────────────────────────────
+  Uab:
+    address: 0x2000
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: V
+    group: voltage
+
+  Ubc:
+    address: 0x2002
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: V
+    group: voltage
+
+  Uca:
+    address: 0x2004
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: V
+    group: voltage
+
+  # ── Voltage L-N ──────────────────────────────────────────
+  Ua:
+    address: 0x2006
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: V
+    group: voltage
+
+  Ub:
+    address: 0x2008
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: V
+    group: voltage
+
+  Uc:
+    address: 0x200A
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: V
+    group: voltage
+
+  # ── Current ──────────────────────────────────────────────
+  Ia:
+    address: 0x200C
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: A
+    group: current
+
+  Ib:
+    address: 0x200E
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: A
+    group: current
+
+  Ic:
+    address: 0x2010
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: A
+    group: current
+
+  # ── Active Power ─────────────────────────────────────────
+  Pt:
+    address: 0x2012
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: W
+    group: active_power
+
+  Pa:
+    address: 0x2014
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: W
+    group: active_power
+
+  Pb:
+    address: 0x2016
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: W
+    group: active_power
+
+  Pc:
+    address: 0x2018
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: W
+    group: active_power
+
+  # ── Reactive Power ───────────────────────────────────────
+  Qt:
+    address: 0x201A
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: var
+    group: reactive_power
+
+  Qa:
+    address: 0x201C
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: var
+    group: reactive_power
+
+  Qb:
+    address: 0x201E
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: var
+    group: reactive_power
+
+  Qc:
+    address: 0x2020
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: var
+    group: reactive_power
+
+  # ── Power Factor ─────────────────────────────────────────
+  PFt:
+    address: 0x202A
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: ""
+    group: power_factor
+
+  PFa:
+    address: 0x202C
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: ""
+    group: power_factor
+
+  PFb:
+    address: 0x202E
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: ""
+    group: power_factor
+
+  PFc:
+    address: 0x2030
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: ""
+    group: power_factor
+
+  # ── Frequency & Demand ───────────────────────────────────
+  frequency:
+    address: 0x2044
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: Hz
+    group: frequency
+
+  active_power_demand:
+    address: 0x2050
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: W
+    group: demand
+
+  # ── Active Energy ─────────────────────────────────────────
+  ImpEp:
+    address: 0x401E
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: kWh
+    group: energy
+
+  ExpEp:
+    address: 0x4028
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: kWh
+    group: energy
+
+  # ── Reactive Energy ───────────────────────────────────────
+  Q1Eq:
+    address: 0x4032
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: kvarh
+    group: energy
+
+  Q2Eq:
+    address: 0x403C
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: kvarh
+    group: energy
+
+  Q3Eq:
+    address: 0x4046
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: kvarh
+    group: energy
+
+  Q4Eq:
+    address: 0x4050
+    type: float32
+    count: 2
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: kvarh
+    group: energy
+
+  # ── Device Info (dibaca sekali saat startup) ──────────────
+  network_mode:
+    address: 0x0003
+    type: int16
+    count: 1
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: ""
+    group: device_info
+    note: "0 = 3P4W, 1 = 3P3W"
+
+  meter_type:
+    address: 0x000B
+    type: int16
+    count: 1
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: ""
+    group: device_info
+
+  slave_id_register:
+    address: 0x002D
+    type: int16
+    count: 1
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: ""
+    group: device_info
+
+  baudrate_register:
+    address: 0x002E
+    type: int16
+    count: 1
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: bps
+    group: device_info
