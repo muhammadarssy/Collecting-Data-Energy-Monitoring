@@ -90,14 +90,14 @@ energy-collector/
                                         └── IDLE  → skip
 
 [GPIO callback — event-driven, per pin]
-    Falling edge (HIGH → LOW):
+    Rising edge (LOW → HIGH):
         ├── Jika state IDLE → mulai sesi baru (generate session_id, start insert)
         └── Jika state AKTIF → tutup cycle lama (assign cycle_id), buka cycle baru
 
-    Rising edge (LOW → HIGH):
-        └── Catat waktu naik → start timeout countdown
+    Falling edge (HIGH → LOW):
+        └── Catat waktu turun → start timeout countdown
 
-    Timeout (HIGH terlalu lama tanpa LOW):
+    Timeout (LOW terlalu lama tanpa HIGH):
         └── Tutup sesi → state kembali IDLE → berhenti insert ke DB
 ```
 
@@ -109,25 +109,25 @@ energy-collector/
 
 ```
 IDLE
-  │  falling edge (HIGH → LOW)
+  │  rising edge (LOW → HIGH)
   ▼
 SAVING — cycle_id aktif, data masuk DB
-  │  rising edge (LOW → HIGH)
+  │  falling edge (HIGH → LOW)
   ▼
 COOLING — data masih masuk DB, timeout berjalan
   │
-  ├── falling edge (HIGH → LOW) sebelum timeout
+  ├── rising edge (LOW → HIGH) sebelum timeout
   │       └── tutup cycle lama → assign cycle_id
   │           buka cycle baru → kembali ke SAVING
   │
-  └── timeout tercapai (tidak ada LOW)
+  └── timeout tercapai (tidak ada HIGH)
           └── tutup sesi → kembali ke IDLE
 ```
 
 ### Visualisasi sinyal
 
 ```
-GPIO:   HIGH ── LOW ────── HIGH ──── LOW ────── HIGH ──── LOW ─── HIGH ──timeout──► IDLE
+GPIO:   LOW ── HIGH ────── LOW ──── HIGH ────── LOW ──── HIGH ─── LOW ──timeout──► IDLE
                 │                   │                   │
              session                ▼                   ▼
              start             tutup cycle 1       tutup cycle 2
@@ -143,13 +143,13 @@ Cycle:         [────────── cycle_1 ────────�
 
 | Fase GPIO | State sistem | Data ke DB | Keterangan |
 |---|---|---|---|
-| HIGH (awal) | IDLE | Tidak | Menunggu produksi mulai |
-| Falling edge pertama | IDLE → SAVING | Mulai | Session baru, cycle_1 dibuka |
-| LOW | SAVING | Ya | Fase injection |
-| Rising edge | SAVING → COOLING | Ya | Fase cooling, timeout mulai |
-| HIGH (cooling) | COOLING | Ya | Masih bagian dari cycle aktif |
-| Falling edge berikutnya | COOLING → SAVING | Ya | cycle_1 ditutup, cycle_2 dibuka |
-| HIGH melebihi timeout | COOLING → IDLE | Berhenti | Sesi selesai, mesin berhenti produksi |
+| LOW (awal) | IDLE | Tidak | Menunggu produksi mulai |
+| Rising edge pertama | IDLE → SAVING | Mulai | Session baru, cycle_1 dibuka |
+| HIGH | SAVING | Ya | Fase injection |
+| Falling edge | SAVING → COOLING | Ya | Fase cooling, timeout mulai |
+| LOW (cooling) | COOLING | Ya | Masih bagian dari cycle aktif |
+| Rising edge berikutnya | COOLING → SAVING | Ya | cycle_1 ditutup, cycle_2 dibuka |
+| LOW melebihi timeout | COOLING → IDLE | Berhenti | Sesi selesai, mesin berhenti produksi |
 
 ---
 
@@ -172,7 +172,7 @@ Parameter global:
 
 - `DB_URL` — PostgreSQL connection string
 - `BUFFER_MAXLEN` — kapasitas ring buffer per meter dalam jumlah sample (default `240` = 2 menit @ 500ms, bisa di-set via `.env`)
-- `CYCLE_TIMEOUT_SECONDS` — durasi HIGH maksimal sebelum sesi dianggap selesai (default `300` = 5 menit)
+- `CYCLE_TIMEOUT_SECONDS` — durasi LOW maksimal sebelum sesi dianggap selesai (default `300` = 5 menit)
 - `METERS_CONFIG_PATH` — path ke `meters.yaml`
 - `REGISTER_MAP_PATH` — path ke `registers.yaml`
 - `LOG_LEVEL` — level logging (default `INFO`)
@@ -631,35 +631,35 @@ Satu `GPIOHandler` per meter. Handle state machine sesi dan cycle untuk pin yang
 
 Setup:
 - `GPIO.setmode(GPIO.BCM)` — dipanggil sekali di `main.py`
-- `GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_UP)` — optocoupler open-collector, default HIGH
+- `GPIO.setup(pin, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)` — default LOW (idle)
 - `GPIO.add_event_detect(pin, GPIO.BOTH, callback=..., bouncetime=debounce_ms)`
 
 State dan transisi:
 
 ```
 IDLE
-  │  falling edge (HIGH → LOW)
+  │  rising edge (LOW → HIGH)
   │  → generate session_id baru
   │  → generate cycle_id baru
   ▼
 SAVING
-  │  rising edge (LOW → HIGH)
-  │  → catat waktu naik, start timeout timer
+  │  falling edge (HIGH → LOW)
+  │  → catat waktu turun, start timeout timer
   ▼
 COOLING
   │
-  ├── falling edge (HIGH → LOW) sebelum timeout
+  ├── rising edge (LOW → HIGH) sebelum timeout
   │       → tutup cycle aktif (simpan cycle_end timestamp)
   │       → generate cycle_id baru
   │       → kembali ke SAVING
   │
-  └── timeout tercapai tanpa falling edge
+  └── timeout tercapai tanpa rising edge
           → tutup sesi (simpan session_end timestamp)
           → cycle_id = None, session_id = None
           → kembali ke IDLE
 ```
 
-Timeout diimplementasikan dengan `threading.Timer` yang di-cancel kalau ada falling edge sebelum waktu habis.
+Timeout diimplementasikan dengan `threading.Timer` yang di-cancel kalau ada rising edge sebelum waktu habis.
 
 State saat ini (IDLE / SAVING / COOLING), `session_id`, dan `cycle_id` aktif di-expose ke polling loop via property yang thread-safe.
 
@@ -822,7 +822,7 @@ LOG_LEVEL=INFO
 
 **Byte order live test:** Cek nilai `Ua` saat pertama jalan — harusnya sekitar 220V. Kalau NaN atau ekstrem, flip `word_order: little` di `registers.yaml`.
 
-**Optocoupler pull-up:** Output open-collector, `PUD_UP` sudah tepat. Pin default HIGH, jadi LOW = mesin aktif.
+**Optocoupler pull-down:** Pakai `PUD_DOWN` supaya pin default LOW (idle), jadi HIGH = mesin aktif. (Sesuaikan dengan wiring optocoupler aktual; jika perlu di-flip, ganti ke `PUD_UP`.)
 
 **Connection pool DB:** Pakai pool (bukan single connection) karena insert terjadi tiap 500ms per meter — 4 meter = potensi 8 insert/detik bersamaan.
 

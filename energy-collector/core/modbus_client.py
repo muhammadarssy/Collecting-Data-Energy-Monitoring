@@ -15,6 +15,7 @@ from core.buffer import RingBuffer
 from core.gpio_handler import GPIOHandler
 from core.hardware.modbus_backend import ModbusBackend, ModbusReadError
 from core.register_parser import RegisterParser
+from core.redis_publisher import RedisPublisher
 from models.meter_reading import MeterReading
 
 log = structlog.get_logger(__name__)
@@ -43,6 +44,7 @@ class ModbusPoller:
         gpio_handler: GPIOHandler,
         poll_interval_seconds: float,
         db=None,
+        redis: Optional[RedisPublisher] = None,
     ) -> None:
         self.meter = meter
         self.backend = backend
@@ -52,6 +54,7 @@ class ModbusPoller:
         self.gpio = gpio_handler
         self.poll_interval = poll_interval_seconds
         self.db = db
+        self.redis = redis
 
         self._stop = asyncio.Event()
         self._log = log.bind(meter_id=meter.id, port=meter.port)
@@ -111,6 +114,9 @@ class ModbusPoller:
         # Selalu ke buffer (untuk frontend), tanpa memandang state.
         self.buffer.push(reading)
 
+        if self.redis is not None and self.redis.ready:
+            await self.redis.publish_reading(reading, gpio_state=state.value)
+
         # Ke DB hanya saat sesi aktif.
         if reading.is_savable and self.db is not None:
             await self.db.insert_reading(reading)
@@ -132,6 +138,8 @@ class ModbusPoller:
             self._log.info("device_info_read", **{
                 k: v for k, v in self.device_info.items() if v is not None
             })
+            if self.redis is not None and self.redis.ready:
+                await self.redis.publish_device_info(self.meter.id, self.device_info)
         except ModbusReadError as exc:
             self._log.warning("device_info_read_failed", error=str(exc))
 
@@ -158,3 +166,5 @@ class ModbusPoller:
             pass
         if not await self._ensure_connected():
             self._log.error("reconnect_failed_max_retry", max_retry=MAX_RETRY)
+            return
+        await self._read_device_info()

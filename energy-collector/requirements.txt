@@ -3,6 +3,7 @@ asyncpg>=0.29
 pydantic-settings>=2.0
 PyYAML>=6.0
 structlog>=24.1
+redis>=5.0
 RPi.GPIO==0.7.1
 
 # GPIO — rpi-lgpio adalah drop-in replacement RPi.GPIO (import tetap sama).

@@ -21,6 +21,7 @@ from core.gpio_handler import GPIOHandler, cleanup_gpio, init_gpio
 from core.hardware import create_modbus_backend
 from core.modbus_client import ModbusPoller
 from core.register_parser import RegisterParser
+from core.redis_publisher import RedisPublisher
 
 log = structlog.get_logger("main")
 
@@ -50,6 +51,7 @@ class Application:
         self.pollers: list[ModbusPoller] = []
         self.gpio_handlers: list[GPIOHandler] = []
         self.db: Optional[Database] = None
+        self.redis: Optional[RedisPublisher] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._shutdown = asyncio.Event()
 
@@ -93,6 +95,24 @@ class Application:
             log.warning("db_unavailable_running_bufferonly", error=str(exc))
             self.db = None
 
+        # 3b. Redis (opsional — mirror buffer & device info untuk service API)
+        if s.redis_url:
+            if not s.collector_id.strip():
+                log.warning(
+                    "redis_collector_id_missing",
+                    hint="Set COLLECTOR_ID di .env agar key Redis unik per device collector",
+                )
+            else:
+                self.redis = RedisPublisher(
+                    redis_url=s.redis_url,
+                    collector_id=s.collector_id.strip(),
+                    buffer_maxlen=s.buffer_maxlen,
+                    device_info_ttl_seconds=s.device_info_ttl_seconds,
+                    key_prefix=s.redis_key_prefix,
+                )
+                if not await self.redis.connect():
+                    self.redis = None
+
         # 4. Per meter: buffer → gpio handler → backend → poller
         parser = RegisterParser(register_map)
         force_mock = s.use_mock_hardware
@@ -121,6 +141,7 @@ class Application:
                 gpio_handler=handler,
                 poll_interval_seconds=s.poll_interval_seconds,
                 db=self.db,
+                redis=self.redis,
             )
             self.pollers.append(poller)
 
@@ -129,6 +150,8 @@ class Application:
             meters=[m.id for m in meters],
             gpio_backend="RPi.GPIO",
             db_enabled=self.db is not None,
+            redis_enabled=self.redis is not None and self.redis.ready,
+            collector_id=s.collector_id.strip() or None,
         )
 
         # 5. Jalankan semua poller sampai shutdown
@@ -146,6 +169,8 @@ class Application:
         for h in self.gpio_handlers:
             h.teardown()
         cleanup_gpio()
+        if self.redis is not None:
+            await self.redis.close()
         if self.db is not None:
             await self.db.close()
 

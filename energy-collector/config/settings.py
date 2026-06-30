@@ -40,6 +40,12 @@ class Settings(BaseSettings):
 
     log_level: str = Field(default="INFO", alias="LOG_LEVEL")
 
+    # Redis — opsional; mirror buffer & device info untuk service API terpisah
+    redis_url: Optional[str] = Field(default=None, alias="REDIS_URL")
+    collector_id: str = Field(default="", alias="COLLECTOR_ID")
+    device_info_ttl_seconds: int = Field(default=86400, alias="DEVICE_INFO_TTL_SECONDS")
+    redis_key_prefix: str = Field(default="energy", alias="REDIS_KEY_PREFIX")
+
     # None = auto-detect (pymodbus ada -> hardware asli, kalau tidak -> mock)
     use_mock_hardware: Optional[bool] = Field(default=None, alias="USE_MOCK_HARDWARE")
 
