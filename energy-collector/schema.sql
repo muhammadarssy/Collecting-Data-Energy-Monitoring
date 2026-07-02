@@ -66,7 +66,14 @@ CREATE TABLE IF NOT EXISTS production_cycles (
     session_id    UUID NOT NULL,
     meter_id      TEXT NOT NULL,
     start_time    TIMESTAMPTZ NOT NULL,
-    end_time      TIMESTAMPTZ
+    end_time      TIMESTAMPTZ,
+    -- Delta energi cycle: pembacaan akhir − pembacaan awal (dari meter_readings)
+    ImpEp         DOUBLE PRECISION,
+    ExpEp         DOUBLE PRECISION
 );
 
 CREATE INDEX IF NOT EXISTS idx_cycles_session ON production_cycles (session_id);
+
+-- Migrasi: tambah kolom energi pada DB yang sudah ada
+ALTER TABLE production_cycles ADD COLUMN IF NOT EXISTS ImpEp DOUBLE PRECISION;
+ALTER TABLE production_cycles ADD COLUMN IF NOT EXISTS ExpEp DOUBLE PRECISION;

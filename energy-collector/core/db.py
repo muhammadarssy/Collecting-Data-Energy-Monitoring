@@ -116,7 +116,17 @@ class Database:
 
     async def close_cycle(self, meter_id: str, cycle_id: str, end_time: datetime) -> None:
         await self._exec(
-            "UPDATE production_cycles SET end_time = $2 WHERE cycle_id = $1",
+            "UPDATE production_cycles pc SET "
+            "end_time = $2, "
+            "impep = COALESCE(("
+            "  SELECT MAX(r.impep) - MIN(r.impep) "
+            "  FROM meter_readings r WHERE r.cycle_id = $1"
+            "), 0), "
+            "expep = COALESCE(("
+            "  SELECT MAX(r.expep) - MIN(r.expep) "
+            "  FROM meter_readings r WHERE r.cycle_id = $1"
+            "), 0) "
+            "WHERE pc.cycle_id = $1",
             _as_uuid(cycle_id), end_time,
             label="close_cycle",
         )
