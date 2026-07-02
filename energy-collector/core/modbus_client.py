@@ -115,7 +115,12 @@ class ModbusPoller:
         self.buffer.push(reading)
 
         if self.redis is not None and self.redis.ready:
-            await self.redis.publish_reading(reading, gpio_state=state.value)
+            # UrAt/IrAt dari cache device_info — tidak dibaca ulang tiap poll.
+            await self.redis.publish_reading(
+                reading,
+                gpio_state=state.value,
+                device_info=self.device_info,
+            )
 
         # Ke DB hanya saat sesi aktif.
         if reading.is_savable and self.db is not None:

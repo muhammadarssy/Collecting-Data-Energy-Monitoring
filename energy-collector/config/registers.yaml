@@ -306,6 +306,28 @@ registers:
     group: energy
 
   # ── Device Info (dibaca sekali saat startup) ──────────────
+  IrAt:
+    address: 0x0006
+    type: int16
+    count: 1
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: ""
+    group: device_info
+    note: "CT ratio"
+
+  UrAt:
+    address: 0x0007
+    type: int16
+    count: 1
+    byte_order: big
+    word_order: big
+    scale: 1.0
+    unit: ""
+    group: device_info
+    note: "PT ratio"
+
   network_mode:
     address: 0x0003
     type: int16

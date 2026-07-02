@@ -1,10 +1,11 @@
-pymodbus>=3.6,<4.0
+pymodbus==3.6.9
 asyncpg>=0.29
 pydantic-settings>=2.0
 PyYAML>=6.0
 structlog>=24.1
 redis>=5.0
 RPi.GPIO==0.7.1
+pyserial==3.5
 
 # GPIO — rpi-lgpio adalah drop-in replacement RPi.GPIO (import tetap sama).
 # Wajib di Pi OS Bookworm / kernel 6.6+; RPi.GPIO klasik gagal add_event_detect.
