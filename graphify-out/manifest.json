@@ -1,0 +1,82 @@
+{
+  "energy-collector/config/__init__.py": {
+    "mtime": 1782268271.9237955,
+    "ast_hash": "d10a451beab1a24a71a6c25c75631f07",
+    "semantic_hash": "d10a451beab1a24a71a6c25c75631f07"
+  },
+  "energy-collector/config/settings.py": {
+    "mtime": 1782959699.0911286,
+    "ast_hash": "67ec174202c141268b03735e6023240f",
+    "semantic_hash": "67ec174202c141268b03735e6023240f"
+  },
+  "energy-collector/core/__init__.py": {
+    "mtime": 1782696440.41591,
+    "ast_hash": "e10914e653e20984b7ca7ca169df26b1",
+    "semantic_hash": "e10914e653e20984b7ca7ca169df26b1"
+  },
+  "energy-collector/core/buffer.py": {
+    "mtime": 1782268331.1049771,
+    "ast_hash": "99ad9275fbf7236e2617971862aafb9a",
+    "semantic_hash": "99ad9275fbf7236e2617971862aafb9a"
+  },
+  "energy-collector/core/db.py": {
+    "mtime": 1782957762.6797714,
+    "ast_hash": "b701eb8bfa157cb1b963e7463b09dead",
+    "semantic_hash": "b701eb8bfa157cb1b963e7463b09dead"
+  },
+  "energy-collector/core/gpio_handler.py": {
+    "mtime": 1782356512.9197865,
+    "ast_hash": "9e70182b5416a0227f048cab50b78454",
+    "semantic_hash": "9e70182b5416a0227f048cab50b78454"
+  },
+  "energy-collector/core/hardware/__init__.py": {
+    "mtime": 1782355075.7520156,
+    "ast_hash": "0e4f63077a990c1d6430612a766547bf",
+    "semantic_hash": "0e4f63077a990c1d6430612a766547bf"
+  },
+  "energy-collector/core/hardware/modbus_backend.py": {
+    "mtime": 1782268418.7272599,
+    "ast_hash": "8c5a0c6437cde73637dc8b77d818d855",
+    "semantic_hash": "8c5a0c6437cde73637dc8b77d818d855"
+  },
+  "energy-collector/core/modbus_client.py": {
+    "mtime": 1782891188.7172668,
+    "ast_hash": "b5a5c989246caf952fa0920c1e360927",
+    "semantic_hash": "b5a5c989246caf952fa0920c1e360927"
+  },
+  "energy-collector/core/redis_publisher.py": {
+    "mtime": 1782891187.7076201,
+    "ast_hash": "2de9161c3a7ad4795373ee653c0d9dff",
+    "semantic_hash": "2de9161c3a7ad4795373ee653c0d9dff"
+  },
+  "energy-collector/core/register_parser.py": {
+    "mtime": 1782268323.2454996,
+    "ast_hash": "7f74d4c4ee7c30a5560c4ad7c730f117",
+    "semantic_hash": "7f74d4c4ee7c30a5560c4ad7c730f117"
+  },
+  "energy-collector/main.py": {
+    "mtime": 1782959699.0538905,
+    "ast_hash": "733803169676e5720812928ad23abf6d",
+    "semantic_hash": "733803169676e5720812928ad23abf6d"
+  },
+  "energy-collector/models/__init__.py": {
+    "mtime": 1782268295.5734808,
+    "ast_hash": "1a939587769323da96d35c47169aa1c4",
+    "semantic_hash": "1a939587769323da96d35c47169aa1c4"
+  },
+  "energy-collector/models/meter_reading.py": {
+    "mtime": 1782268289.8642616,
+    "ast_hash": "683be4b40e4e89bd9228e876782b0d6d",
+    "semantic_hash": "683be4b40e4e89bd9228e876782b0d6d"
+  },
+  "energy-collector/schema.sql": {
+    "mtime": 1782957768.099866,
+    "ast_hash": "af58babfe7886d7330b2d86f7ff92c03",
+    "semantic_hash": "af58babfe7886d7330b2d86f7ff92c03"
+  },
+  "gpio_reader.py": {
+    "mtime": 1782356438.0720396,
+    "ast_hash": "bcf903954f1f9d5d1b40ad89c1481a93",
+    "semantic_hash": "bcf903954f1f9d5d1b40ad89c1481a93"
+  }
+}

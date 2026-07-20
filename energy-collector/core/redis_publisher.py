@@ -28,6 +28,7 @@ def _serialize_reading(
     collector_id: str,
     gpio_state: Optional[str] = None,
     device_info: Optional[dict[str, Optional[float]]] = None,
+    running_seconds: Optional[float] = None,
 ) -> str:
     values = dict(reading.values)
     if device_info:
@@ -38,6 +39,7 @@ def _serialize_reading(
     payload = {
         "collector_id": collector_id,
         "meter_id": reading.meter_id,
+        "device_type": reading.device_type,
         "timestamp": reading.timestamp.isoformat(),
         "session_id": reading.session_id,
         "cycle_id": reading.cycle_id,
@@ -45,6 +47,8 @@ def _serialize_reading(
     }
     if gpio_state is not None:
         payload["gpio_state"] = gpio_state
+    if running_seconds is not None:
+        payload["running_seconds"] = round(running_seconds, 3)
     return json.dumps(payload, default=str)
 
 
@@ -101,12 +105,17 @@ class RedisPublisher:
         reading: MeterReading,
         gpio_state: Optional[str] = None,
         device_info: Optional[dict[str, Optional[float]]] = None,
+        running_seconds: Optional[float] = None,
     ) -> None:
         if not self.ready:
             return
         try:
             body = _serialize_reading(
-                reading, self.collector_id, gpio_state, device_info
+                reading,
+                self.collector_id,
+                gpio_state,
+                device_info,
+                running_seconds=running_seconds,
             )
             key_latest = self._key(reading.meter_id, "latest")
             key_readings = self._key(reading.meter_id, "readings")
@@ -122,6 +131,7 @@ class RedisPublisher:
         self,
         meter_id: str,
         info: dict[str, Optional[float]],
+        device_type: Optional[str] = None,
     ) -> None:
         if not self.ready or not info:
             return
@@ -133,6 +143,8 @@ class RedisPublisher:
             }
             mapping["collector_id"] = self.collector_id
             mapping["meter_id"] = meter_id
+            if device_type is not None:
+                mapping["device_type"] = device_type
             mapping["updated_at"] = datetime.now(timezone.utc).isoformat()
             async with self._client.pipeline(transaction=True) as pipe:
                 pipe.hset(key, mapping=mapping)

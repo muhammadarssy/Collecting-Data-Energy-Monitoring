@@ -4,9 +4,10 @@
 
 CREATE TABLE IF NOT EXISTS meter_readings (
     time                  TIMESTAMPTZ     NOT NULL,
-    session_id            UUID            NOT NULL,
-    cycle_id              UUID            NOT NULL,
+    session_id            UUID,                 -- NULL untuk meter type=utils
+    cycle_id              UUID,                 -- NULL untuk meter type=utils
     meter_id              TEXT            NOT NULL,
+    device_type           TEXT            NOT NULL DEFAULT 'energy',  -- energy | utils
     -- Voltage L-L
     Uab                   DOUBLE PRECISION,
     Ubc                   DOUBLE PRECISION,
@@ -51,6 +52,8 @@ CREATE INDEX IF NOT EXISTS idx_readings_meter_cycle_time
     ON meter_readings (meter_id, cycle_id, time DESC);
 CREATE INDEX IF NOT EXISTS idx_readings_session_time
     ON meter_readings (session_id, time DESC);
+CREATE INDEX IF NOT EXISTS idx_readings_meter_type_time
+    ON meter_readings (meter_id, device_type, time DESC);
 
 -- Tracking sesi produksi
 CREATE TABLE IF NOT EXISTS production_sessions (
@@ -77,3 +80,8 @@ CREATE INDEX IF NOT EXISTS idx_cycles_session ON production_cycles (session_id);
 -- Migrasi: tambah kolom energi pada DB yang sudah ada
 ALTER TABLE production_cycles ADD COLUMN IF NOT EXISTS ImpEp DOUBLE PRECISION;
 ALTER TABLE production_cycles ADD COLUMN IF NOT EXISTS ExpEp DOUBLE PRECISION;
+
+-- Migrasi: dukung meter type=utils (tanpa session/cycle) + kolom device_type
+ALTER TABLE meter_readings ALTER COLUMN session_id DROP NOT NULL;
+ALTER TABLE meter_readings ALTER COLUMN cycle_id DROP NOT NULL;
+ALTER TABLE meter_readings ADD COLUMN IF NOT EXISTS device_type TEXT NOT NULL DEFAULT 'energy';

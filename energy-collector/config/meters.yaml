@@ -1,12 +1,62 @@
 meters:
-  - id: meter_01
-    label: "Mesin Injeksi 1"
-    port: /dev/ttyACM5
+  # - id: meter_01
+  #   label: "Mesin Injeksi 1"
+  #   type: energy
+  #   port: /dev/ttyACM1
+  #   baudrate: 9600
+  #   slave_id: 2
+  #   parity: N
+  #   stopbits: 1
+  #   gpio_pin: 3
+  #   gpio_debounce_ms: 50
+
+  - id: meter_id3
+    label: "Mesin Injeksi 3"
+    type: energy
+    port: /dev/ttyACM2
     baudrate: 9600
-    slave_id: 1
+    slave_id: 3
     parity: N
     stopbits: 1
-    gpio_pin: 3
+    gpio_pin: 14
     gpio_debounce_ms: 50
 
+  - id: meter_id4
+    label: "Mesin Injeksi 4"
+    type: energy
+    port: /dev/ttyACM3
+    baudrate: 9600
+    slave_id: 4
+    parity: N
+    stopbits: 1
+    gpio_pin: 15
+    gpio_debounce_ms: 50
 
+  - id: utils_id5
+    label: "Panel Utilitas 5"
+    type: utils
+    port: /dev/ttyACM4
+    baudrate: 9600
+    slave_id: 5
+    parity: N
+    stopbits: 1
+
+  - id: utils_id5
+    label: "Panel Utilitas 6"
+    type: utils
+    port: /dev/ttyACM5
+    baudrate: 9600
+    slave_id: 6
+    parity: N
+    stopbits: 1
+
+  # Contoh meter utilitas (tanpa GPIO/cycle).
+  # History ke PostgreSQL tiap UTILS_HISTORY_INTERVAL_SECONDS; live tetap 500ms → buffer/Redis.
+  # - id: utils_01
+  #   label: "Panel Utilitas 1"
+  #   type: utils
+  #   port: /dev/ttyACM6
+  #   baudrate: 9600
+  #   slave_id: 1
+  #   parity: N
+  #   stopbits: 1

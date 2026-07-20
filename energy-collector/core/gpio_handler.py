@@ -100,6 +100,8 @@ class GPIOHandler:
         on_cycle_close: Optional[CycleCloseHook] = None,
     ) -> None:
         self.meter = meter
+        if meter.gpio_pin is None:
+            raise ValueError(f"GPIOHandler butuh gpio_pin untuk meter '{meter.id}'")
         self.pin = meter.gpio_pin
         self.cycle_timeout_seconds = cycle_timeout_seconds
 

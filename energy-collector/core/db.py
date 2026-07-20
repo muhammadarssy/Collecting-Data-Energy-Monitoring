@@ -19,7 +19,7 @@ log = structlog.get_logger(__name__)
 
 
 def _build_insert_sql() -> str:
-    cols = ["time", "session_id", "cycle_id", "meter_id", *MEASUREMENT_FIELDS]
+    cols = ["time", "session_id", "cycle_id", "meter_id", "device_type", *MEASUREMENT_FIELDS]
     placeholders = ", ".join(f"${i + 1}" for i in range(len(cols)))
     col_list = ", ".join(cols)
     return f"INSERT INTO meter_readings ({col_list}) VALUES ({placeholders})"
@@ -68,6 +68,7 @@ class Database:
                 _as_uuid(reading.session_id),
                 _as_uuid(reading.cycle_id),
                 reading.meter_id,
+                reading.device_type,
                 *reading.measurement_tuple(),
             )
             async with self._pool.acquire() as conn:
@@ -75,6 +76,7 @@ class Database:
             log.debug(
                 "db_insert_ok",
                 meter_id=reading.meter_id,
+                device_type=reading.device_type,
                 cycle_id=reading.cycle_id,
                 timestamp=reading.timestamp.isoformat(),
             )
@@ -82,6 +84,7 @@ class Database:
             log.error(
                 "db_insert_failed",
                 meter_id=reading.meter_id,
+                device_type=reading.device_type,
                 cycle_id=reading.cycle_id,
                 error=str(exc),
             )

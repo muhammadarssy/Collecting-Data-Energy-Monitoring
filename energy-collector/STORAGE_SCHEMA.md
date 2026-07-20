@@ -3,7 +3,22 @@
 Referensi struktur data untuk **Energy Meter Collection System**, dipakai sebagai acuan saat membangun endpoint API yang membaca data dari Redis (live) maupun PostgreSQL (historis).
 
 - **Redis** → mirror real-time: sample terbaru, ring buffer, dan device info. Cocok untuk live view / polling cepat.
-- **PostgreSQL** → penyimpanan historis: hanya sample saat sesi produksi aktif + tracking sesi/cycle. Cocok untuk laporan & query rentang waktu.
+- **PostgreSQL** → penyimpanan historis:
+  - **energy** — sample saat sesi produksi aktif (GPIO) + tracking sesi/cycle
+  - **utils** — snapshot tiap `UTILS_HISTORY_INTERVAL_SECONDS` (tanpa cycle)
+
+---
+
+## 0. Tipe Device (`device_type`)
+
+Dikonfigurasi di `meters.yaml` via field `type`:
+
+| `type`   | GPIO | Live (buffer/Redis)     | History PostgreSQL                          |
+| -------- | ---- | ----------------------- | ------------------------------------------- |
+| `energy` | ya   | tiap `POLL_INTERVAL_MS` | saat state `SAVING` / `COOLING`             |
+| `utils`  | tidak| tiap `POLL_INTERVAL_MS` | tiap `UTILS_HISTORY_INTERVAL_SECONDS` (snapshot terbaru) |
+
+Kedua tipe memakai register map, protocol, dan baud yang sama.
 
 ---
 
@@ -51,6 +66,7 @@ Keduanya menyimpan JSON dengan struktur yang sama.
 {
   "collector_id": "pi-line-1",
   "meter_id": "meter_01",
+  "device_type": "energy",
   "timestamp": "2026-06-30T02:05:31.123456+00:00",
   "session_id": "550e8400-e29b-41d4-a716-446655440000",
   "cycle_id": "7c9e6679-7425-40de-944b-e07fc1f90ae7",
@@ -70,17 +86,30 @@ Keduanya menyimpan JSON dengan struktur yang sama.
 }
 ```
 
-| Field          | Tipe                 | Catatan                                                              |
-| -------------- | -------------------- | ------------------------------------------------------------------- |
-| `collector_id` | string               | ID device collector (Raspberry Pi)                                  |
-| `meter_id`     | string               | ID meter                                                            |
-| `timestamp`    | string (ISO 8601)    | Waktu pembacaan, UTC                                                 |
-| `session_id`   | string (UUID) \| null | `null` saat mesin idle (state `IDLE`)                              |
-| `cycle_id`     | string (UUID) \| null | `null` saat mesin idle                                             |
-| `gpio_state`   | string               | `IDLE` \| `SAVING` \| `COOLING`                                     |
-| `values`       | object               | Map nama field → nilai (float) atau `null` jika register error      |
+Untuk meter `utils`, `session_id`/`cycle_id` selalu `null`, `gpio_state` dihilangkan, dan ada field tambahan:
 
-> **Catatan:** Sample **selalu** dipublish ke Redis tanpa memandang state GPIO. Saat `IDLE`, `session_id`/`cycle_id` bernilai `null` dan data **tidak** masuk PostgreSQL (hanya live view).
+```json
+{
+  "device_type": "utils",
+  "session_id": null,
+  "cycle_id": null,
+  "running_seconds": 1234.5
+}
+```
+
+| Field              | Tipe                 | Catatan                                                              |
+| ------------------ | -------------------- | ------------------------------------------------------------------- |
+| `collector_id`     | string               | ID device collector (Raspberry Pi)                                  |
+| `meter_id`         | string               | ID meter                                                            |
+| `device_type`      | string               | `energy` \| `utils`                                                 |
+| `timestamp`        | string (ISO 8601)    | Waktu pembacaan, UTC                                                 |
+| `session_id`       | string (UUID) \| null | `null` saat idle / selalu `null` untuk utils                       |
+| `cycle_id`         | string (UUID) \| null | `null` saat idle / selalu `null` untuk utils                       |
+| `gpio_state`       | string \| omitted    | `IDLE` \| `SAVING` \| `COOLING` (hanya energy)                      |
+| `running_seconds`  | number \| omitted    | Uptime poller sejak start (hanya utils)                             |
+| `values`           | object               | Map nama field → nilai (float) atau `null` jika register error      |
+
+> **Catatan:** Sample **selalu** dipublish ke Redis tanpa memandang state GPIO. Untuk energy saat `IDLE`, `session_id`/`cycle_id` bernilai `null` dan data **tidak** masuk PostgreSQL (hanya live view). Utils tetap publish live tiap poll; history DB terpisah (interval).
 
 ### 1.3 `device_info` (Hash)
 
@@ -94,6 +123,7 @@ Dibaca sekali saat startup, punya TTL (default 86400 detik / 24 jam).
 | `baudrate_register`  | string | Baudrate (bps)                               |
 | `collector_id`       | string | ID collector                                 |
 | `meter_id`           | string | ID meter                                     |
+| `device_type`        | string | `energy` \| `utils`                          |
 | `updated_at`         | string | ISO 8601, waktu update terakhir              |
 
 > Nilai numerik disimpan sebagai **string** (konversi `HSET`). Nilai yang gagal dibaca disimpan sebagai string kosong `""`.
@@ -133,20 +163,19 @@ keys = await r.keys("energy:pi-line-1:meter:*:latest")
 
 ## 2. PostgreSQL
 
-Tiga tabel: `meter_readings` (data sample), `production_sessions` & `production_cycles` (tracking).
+Tiga tabel: `meter_readings` (data sample), `production_sessions` & `production_cycles` (tracking — hanya energy).
 
 > Identifier kolom disimpan **lowercase** oleh PostgreSQL (tidak di-quote). Mis. kolom `Uab` di-query sebagai `uab`.
 
 ### 2.1 Tabel `meter_readings`
 
-Insert per sample (real-time) **hanya saat sesi produksi aktif**.
-
-| Kolom        | Tipe          | Keterangan                          |
-| ------------ | ------------- | ----------------------------------- |
-| `time`       | TIMESTAMPTZ   | Waktu pembacaan (NOT NULL)          |
-| `session_id` | UUID          | ID sesi produksi (NOT NULL)         |
-| `cycle_id`   | UUID          | ID cycle (NOT NULL)                 |
-| `meter_id`   | TEXT          | ID meter (NOT NULL)                 |
+| Kolom          | Tipe          | Keterangan                                      |
+| -------------- | ------------- | ----------------------------------------------- |
+| `time`         | TIMESTAMPTZ   | Waktu pembacaan (NOT NULL)                      |
+| `session_id`   | UUID          | ID sesi (NULL untuk utils / energy idle)        |
+| `cycle_id`     | UUID          | ID cycle (NULL untuk utils / energy idle)       |
+| `meter_id`     | TEXT          | ID meter (NOT NULL)                             |
+| `device_type`  | TEXT          | `energy` \| `utils` (NOT NULL, default energy)  |
 
 **Kolom measurement** (semua `DOUBLE PRECISION`, nullable):
 
@@ -168,11 +197,12 @@ Insert per sample (real-time) **hanya saat sesi produksi aktif**.
 ```sql
 idx_readings_meter_cycle_time  ON (meter_id, cycle_id, time DESC)
 idx_readings_session_time      ON (session_id, time DESC)
+idx_readings_meter_type_time   ON (meter_id, device_type, time DESC)
 ```
 
 ### 2.2 Tabel `production_sessions`
 
-Satu baris per sesi produksi (rentang mesin aktif sampai timeout).
+Satu baris per sesi produksi (rentang mesin aktif sampai timeout). Hanya meter **energy**.
 
 | Kolom        | Tipe        | Keterangan                                   |
 | ------------ | ----------- | -------------------------------------------- |
@@ -183,7 +213,7 @@ Satu baris per sesi produksi (rentang mesin aktif sampai timeout).
 
 ### 2.3 Tabel `production_cycles`
 
-Satu baris per cycle (siklus mesin di dalam satu sesi).
+Satu baris per cycle (siklus mesin di dalam satu sesi). Hanya meter **energy**.
 
 | Kolom        | Tipe        | Keterangan                                   |
 | ------------ | ----------- | -------------------------------------------- |
@@ -201,13 +231,23 @@ Satu baris per cycle (siklus mesin di dalam satu sesi).
 
 ### 2.4 Contoh Query (untuk Endpoint)
 
-**Reading historis satu cycle:**
+**Reading historis satu cycle (energy):**
 
 ```sql
 SELECT time, ua, ub, uc, ia, ib, ic, pt, frequency, impep
 FROM meter_readings
 WHERE meter_id = $1 AND cycle_id = $2
 ORDER BY time ASC;
+```
+
+**History utils (tanpa cycle):**
+
+```sql
+SELECT time, ua, ub, uc, ia, ib, ic, pt, frequency, impep
+FROM meter_readings
+WHERE meter_id = $1 AND device_type = 'utils'
+ORDER BY time DESC
+LIMIT 288;  -- ≈ 24 jam @ 5 menit
 ```
 
 **Daftar sesi terakhir + jumlah cycle:**
@@ -235,7 +275,7 @@ GROUP BY cycle_id;
 
 ---
 
-## 3. State GPIO & Implikasi Penyimpanan
+## 3. State GPIO & Implikasi Penyimpanan (energy)
 
 | State     | Arti                              | Masuk Redis | Masuk PostgreSQL | `session_id`/`cycle_id` |
 | --------- | --------------------------------- | ----------- | ---------------- | ----------------------- |
@@ -246,15 +286,18 @@ GROUP BY cycle_id;
 Transisi: `IDLE --(LOW)--> SAVING --(HIGH)--> COOLING --(LOW)--> SAVING ...`
 `COOLING --(timeout `CYCLE_TIMEOUT_SECONDS`)--> IDLE` (sesi & cycle ditutup).
 
+**Utils:** tidak ada GPIO/state machine. Redis tiap poll; PostgreSQL tiap interval history.
+
 ---
 
 ## 4. Parameter Konfigurasi Relevan
 
-| Env Var                   | Default  | Pengaruh                                              |
-| ------------------------- | -------- | ----------------------------------------------------- |
-| `REDIS_KEY_PREFIX`        | `energy` | Prefix semua key Redis                                |
-| `COLLECTOR_ID`            | —        | Bagian key Redis; wajib unik per device collector     |
-| `BUFFER_MAXLEN`           | `240`    | Panjang maks list `readings` (≈ durasi live view)     |
-| `DEVICE_INFO_TTL_SECONDS` | `86400`  | TTL hash `device_info`                                |
-| `POLL_INTERVAL_MS`        | `500`    | Interval sample → frekuensi data masuk                |
-| `CYCLE_TIMEOUT_SECONDS`   | `300`    | Durasi HIGH sebelum sesi ditutup                      |
+| Env Var                          | Default  | Pengaruh                                              |
+| -------------------------------- | -------- | ----------------------------------------------------- |
+| `REDIS_KEY_PREFIX`               | `energy` | Prefix semua key Redis                                |
+| `COLLECTOR_ID`                   | —        | Bagian key Redis; wajib unik per device collector     |
+| `BUFFER_MAXLEN`                  | `240`    | Panjang maks list `readings` (≈ durasi live view)     |
+| `DEVICE_INFO_TTL_SECONDS`        | `86400`  | TTL hash `device_info`                                |
+| `POLL_INTERVAL_MS`               | `500`    | Interval sample live (energy & utils)                 |
+| `UTILS_HISTORY_INTERVAL_SECONDS` | `300`    | Interval snapshot utils → PostgreSQL                  |
+| `CYCLE_TIMEOUT_SECONDS`          | `300`    | Durasi HIGH sebelum sesi ditutup (energy)             |

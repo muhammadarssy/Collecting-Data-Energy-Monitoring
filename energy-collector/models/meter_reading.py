@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
-from typing import Optional
+from typing import Literal, Optional
 
 # Urutan kolom measurement sesuai schema DB (meter_readings).
 # Dipakai juga untuk membangun INSERT statement secara konsisten.
@@ -28,25 +28,32 @@ MEASUREMENT_FIELDS: tuple[str, ...] = (
     "Q1Eq", "Q2Eq", "Q3Eq", "Q4Eq",
 )
 
+DeviceType = Literal["energy", "utils"]
+
 
 @dataclass
 class MeterReading:
     """Satu sample pembacaan dari satu meter.
 
-    `cycle_id` / `session_id` bernilai None saat state IDLE — sample seperti ini
+    Energy: `cycle_id` / `session_id` bernilai None saat state IDLE — sample
     tetap masuk ring buffer namun tidak di-insert ke DB.
+
+    Utils: session/cycle selalu None; persist history dikontrol interval di poller.
     """
 
     meter_id: str
     timestamp: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
     session_id: Optional[str] = None
     cycle_id: Optional[str] = None
+    device_type: DeviceType = "energy"
     # Nama field -> nilai (float) atau None kalau register error.
     values: dict[str, Optional[float]] = field(default_factory=dict)
 
     @property
     def is_savable(self) -> bool:
-        """True kalau sample punya session & cycle aktif (boleh masuk DB)."""
+        """True kalau sample energy punya session & cycle aktif (boleh masuk DB)."""
+        if self.device_type != "energy":
+            return False
         return self.session_id is not None and self.cycle_id is not None
 
     def get(self, field_name: str) -> Optional[float]:

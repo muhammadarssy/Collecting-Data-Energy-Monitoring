@@ -54,6 +54,7 @@ class Application:
         self.redis: Optional[RedisPublisher] = None
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._shutdown = asyncio.Event()
+        self._gpio_initialized = False
 
     # ── Hook DB dari thread GPIO → schedule ke event loop ────
     def _schedule(self, coro_factory, *args) -> None:
@@ -76,16 +77,24 @@ class Application:
             log.error("config_invalid", error=str(exc))
             raise SystemExit(1)
 
+        energy_meters = [m for m in meters if m.is_energy]
+        utils_meters = [m for m in meters if m.is_utils]
+
         log.info(
             "config_loaded",
             meter_count=len(meters),
+            energy_count=len(energy_meters),
+            utils_count=len(utils_meters),
             register_count=len(register_map),
             poll_interval_ms=s.poll_interval_ms,
             cycle_timeout_seconds=s.cycle_timeout_seconds,
+            utils_history_interval_seconds=s.utils_history_interval_seconds,
         )
 
-        # 2. GPIO (RPi.GPIO langsung)
-        init_gpio()
+        # 2. GPIO hanya jika ada meter energy
+        if energy_meters:
+            init_gpio()
+            self._gpio_initialized = True
 
         # 3. DB (opsional — kalau gagal connect, jalan tanpa DB / buffer-only)
         self.db = Database(s.db_url)
@@ -113,23 +122,25 @@ class Application:
                 if not await self.redis.connect():
                     self.redis = None
 
-        # 4. Per meter: buffer → gpio handler → backend → poller
+        # 4. Per meter: buffer → gpio (energy) → backend → poller
         parser = RegisterParser(register_map)
         force_mock = s.use_mock_hardware
 
         for meter in meters:
             buffer = RingBuffer(maxlen=s.buffer_maxlen)
+            handler: Optional[GPIOHandler] = None
 
-            handler = GPIOHandler(
-                meter=meter,
-                cycle_timeout_seconds=s.cycle_timeout_seconds,
-                on_session_start=lambda *a: self._schedule(self._db_start_session, *a),
-                on_session_end=lambda *a: self._schedule(self._db_end_session, *a),
-                on_cycle_open=lambda *a: self._schedule(self._db_open_cycle, *a),
-                on_cycle_close=lambda *a: self._schedule(self._db_close_cycle, *a),
-            )
-            handler.setup()
-            self.gpio_handlers.append(handler)
+            if meter.is_energy:
+                handler = GPIOHandler(
+                    meter=meter,
+                    cycle_timeout_seconds=s.cycle_timeout_seconds,
+                    on_session_start=lambda *a: self._schedule(self._db_start_session, *a),
+                    on_session_end=lambda *a: self._schedule(self._db_end_session, *a),
+                    on_cycle_open=lambda *a: self._schedule(self._db_open_cycle, *a),
+                    on_cycle_close=lambda *a: self._schedule(self._db_close_cycle, *a),
+                )
+                handler.setup()
+                self.gpio_handlers.append(handler)
 
             backend = create_modbus_backend(meter, register_map, force_mock=force_mock)
             poller = ModbusPoller(
@@ -142,13 +153,14 @@ class Application:
                 poll_interval_seconds=s.poll_interval_seconds,
                 db=self.db,
                 redis=self.redis,
+                utils_history_interval_seconds=s.utils_history_interval_seconds,
             )
             self.pollers.append(poller)
 
         log.info(
             "startup_complete",
-            meters=[m.id for m in meters],
-            gpio_backend="RPi.GPIO",
+            meters=[{"id": m.id, "type": m.device_type} for m in meters],
+            gpio_enabled=self._gpio_initialized,
             db_enabled=self.db is not None,
             redis_enabled=self.redis is not None and self.redis.ready,
             collector_id=s.collector_id.strip() or None,
@@ -168,7 +180,8 @@ class Application:
     async def _cleanup(self) -> None:
         for h in self.gpio_handlers:
             h.teardown()
-        cleanup_gpio()
+        if self._gpio_initialized:
+            cleanup_gpio()
         if self.redis is not None:
             await self.redis.close()
         if self.db is not None:

@@ -1,7 +1,11 @@
 """Polling loop Modbus per meter (asyncio task).
 
 Tiap cycle (default 500ms): baca 2 blok register, parse jadi MeterReading,
-push ke ring buffer (selalu), lalu insert ke DB kalau state GPIO aktif.
+push ke ring buffer + Redis (selalu).
+
+Persist PostgreSQL:
+  - energy — hanya saat state GPIO aktif (session + cycle)
+  - utils  — snapshot terbaru tiap UTILS_HISTORY_INTERVAL_SECONDS (tanpa cycle)
 """
 from __future__ import annotations
 
@@ -12,7 +16,7 @@ import structlog
 
 from config.settings import MeterConfig, RegisterDef
 from core.buffer import RingBuffer
-from core.gpio_handler import GPIOHandler
+from core.gpio_handler import GPIOHandler, State
 from core.hardware.modbus_backend import ModbusBackend, ModbusReadError
 from core.register_parser import RegisterParser
 from core.redis_publisher import RedisPublisher
@@ -41,10 +45,11 @@ class ModbusPoller:
         register_map: dict[str, RegisterDef],
         parser: RegisterParser,
         buffer: RingBuffer,
-        gpio_handler: GPIOHandler,
+        gpio_handler: Optional[GPIOHandler],
         poll_interval_seconds: float,
         db=None,
         redis: Optional[RedisPublisher] = None,
+        utils_history_interval_seconds: float = 300.0,
     ) -> None:
         self.meter = meter
         self.backend = backend
@@ -55,10 +60,17 @@ class ModbusPoller:
         self.poll_interval = poll_interval_seconds
         self.db = db
         self.redis = redis
+        self.utils_history_interval = utils_history_interval_seconds
 
         self._stop = asyncio.Event()
-        self._log = log.bind(meter_id=meter.id, port=meter.port)
+        self._log = log.bind(
+            meter_id=meter.id,
+            port=meter.port,
+            device_type=meter.device_type,
+        )
         self.device_info: dict[str, Optional[float]] = {}
+        self._started_monotonic: Optional[float] = None
+        self._last_utils_history_at: Optional[float] = None
 
     def stop(self) -> None:
         self._stop.set()
@@ -69,9 +81,10 @@ class ModbusPoller:
             self._log.error("modbus_connect_failed_startup")
             return
 
+        self._started_monotonic = asyncio.get_running_loop().time()
         await self._read_device_info()
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         while not self._stop.is_set():
             cycle_start = loop.time()
             try:
@@ -92,6 +105,17 @@ class ModbusPoller:
         await self.backend.close()
         self._log.info("poller_stopped")
 
+    def _gpio_context(self) -> tuple[str, Optional[str], Optional[str]]:
+        if self.gpio is None:
+            return State.IDLE.value, None, None
+        state, session_id, cycle_id = self.gpio.context()
+        return state.value, session_id, cycle_id
+
+    def _running_seconds(self) -> Optional[float]:
+        if self._started_monotonic is None:
+            return None
+        return asyncio.get_running_loop().time() - self._started_monotonic
+
     async def _poll_once(self) -> None:
         block1 = await self.backend.read_holding_registers(
             BLOCK1_BASE, BLOCK1_COUNT, self.meter.slave_id
@@ -103,11 +127,12 @@ class ModbusPoller:
         values = self.parser.parse_block(BLOCK1_BASE, block1)
         values.update(self.parser.parse_block(BLOCK2_BASE, block2))
 
-        state, session_id, cycle_id = self.gpio.context()
+        gpio_state, session_id, cycle_id = self._gpio_context()
         reading = MeterReading(
             meter_id=self.meter.id,
             session_id=session_id,
             cycle_id=cycle_id,
+            device_type=self.meter.device_type,
             values=values,
         )
 
@@ -118,13 +143,43 @@ class ModbusPoller:
             # UrAt/IrAt dari cache device_info — tidak dibaca ulang tiap poll.
             await self.redis.publish_reading(
                 reading,
-                gpio_state=state.value,
+                gpio_state=gpio_state if self.meter.is_energy else None,
                 device_info=self.device_info,
+                running_seconds=self._running_seconds() if self.meter.is_utils else None,
             )
 
-        # Ke DB hanya saat sesi aktif.
-        if reading.is_savable and self.db is not None:
+        if self.db is None:
+            return
+
+        if self.meter.is_utils:
+            await self._maybe_persist_utils_history(reading)
+        elif reading.is_savable:
             await self.db.insert_reading(reading)
+
+    async def _maybe_persist_utils_history(self, reading: MeterReading) -> None:
+        """Insert 1 snapshot terbaru ke DB tiap interval (tanpa session/cycle)."""
+        now = asyncio.get_running_loop().time()
+        if (
+            self._last_utils_history_at is not None
+            and (now - self._last_utils_history_at) < self.utils_history_interval
+        ):
+            return
+
+        history = MeterReading(
+            meter_id=reading.meter_id,
+            timestamp=reading.timestamp,
+            session_id=None,
+            cycle_id=None,
+            device_type="utils",
+            values=reading.values,
+        )
+        await self.db.insert_reading(history)
+        self._last_utils_history_at = now
+        self._log.info(
+            "utils_history_persisted",
+            interval_seconds=self.utils_history_interval,
+            timestamp=history.timestamp.isoformat(),
+        )
 
     async def _read_device_info(self) -> None:
         """Baca register device_info sekali (best-effort)."""
@@ -144,7 +199,11 @@ class ModbusPoller:
                 k: v for k, v in self.device_info.items() if v is not None
             })
             if self.redis is not None and self.redis.ready:
-                await self.redis.publish_device_info(self.meter.id, self.device_info)
+                await self.redis.publish_device_info(
+                    self.meter.id,
+                    self.device_info,
+                    device_type=self.meter.device_type,
+                )
         except ModbusReadError as exc:
             self._log.warning("device_info_read_failed", error=str(exc))
 

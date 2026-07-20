@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Literal, Optional
 
 import yaml
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Root project (folder yang memuat main.py)
@@ -34,6 +34,10 @@ class Settings(BaseSettings):
     buffer_maxlen: int = Field(default=240, alias="BUFFER_MAXLEN")
     cycle_timeout_seconds: float = Field(default=300.0, alias="CYCLE_TIMEOUT_SECONDS")
     poll_interval_ms: int = Field(default=500, alias="POLL_INTERVAL_MS")
+    # Interval persist history ke PostgreSQL untuk meter type=utils (tanpa GPIO/cycle)
+    utils_history_interval_seconds: float = Field(
+        default=300.0, alias="UTILS_HISTORY_INTERVAL_SECONDS"
+    )
 
     meters_config_path: str = Field(default="config/meters.yaml", alias="METERS_CONFIG_PATH")
     register_map_path: str = Field(default="config/registers.yaml", alias="REGISTER_MAP_PATH")
@@ -60,7 +64,14 @@ class Settings(BaseSettings):
 
 
 class MeterConfig(BaseModel):
-    """Konfigurasi satu meter dari `meters.yaml`."""
+    """Konfigurasi satu meter dari `meters.yaml`.
+
+    `type` / `device_type`:
+      - energy — butuh gpio_pin; history DB gated oleh sesi/cycle GPIO
+      - utils  — tanpa GPIO/cycle; history DB tiap UTILS_HISTORY_INTERVAL_SECONDS
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
 
     id: str
     label: str
@@ -70,8 +81,25 @@ class MeterConfig(BaseModel):
     parity: Literal["N", "E", "O"] = "N"
     stopbits: int = 1
     bytesize: int = 8
-    gpio_pin: int
+    device_type: Literal["energy", "utils"] = Field(default="energy", alias="type")
+    gpio_pin: Optional[int] = None
     gpio_debounce_ms: int = 50
+
+    @model_validator(mode="after")
+    def _validate_gpio_for_type(self) -> MeterConfig:
+        if self.device_type == "energy" and self.gpio_pin is None:
+            raise ValueError(f"meter '{self.id}' type=energy wajib punya gpio_pin")
+        if self.device_type == "utils" and self.gpio_pin is not None:
+            raise ValueError(f"meter '{self.id}' type=utils tidak boleh punya gpio_pin")
+        return self
+
+    @property
+    def is_energy(self) -> bool:
+        return self.device_type == "energy"
+
+    @property
+    def is_utils(self) -> bool:
+        return self.device_type == "utils"
 
 
 class RegisterDef(BaseModel):
@@ -105,10 +133,11 @@ def load_meters(path: Path) -> list[MeterConfig]:
     meters = [MeterConfig(**m) for m in raw["meters"]]
     if not meters:
         raise ValueError(f"File meter '{path}' kosong")
-    # Validasi: id, port, dan gpio_pin harus unik
+    # Validasi: id, port unik; gpio_pin unik di antara meter energy saja
     _assert_unique([m.id for m in meters], "id meter")
     _assert_unique([m.port for m in meters], "port serial")
-    _assert_unique([m.gpio_pin for m in meters], "gpio_pin")
+    gpio_pins = [m.gpio_pin for m in meters if m.gpio_pin is not None]
+    _assert_unique(gpio_pins, "gpio_pin")
     return meters
 
 
