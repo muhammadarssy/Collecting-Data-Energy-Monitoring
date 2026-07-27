@@ -1,15 +1,16 @@
-# Graph Report - .  (2026-07-16)
+# Graph Report - 05_Collecting Data  (2026-07-27)
 
 ## Corpus Check
-- cluster-only mode — file stats not available
+- 18 files · ~10,910 words
+- Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 188 nodes · 365 edges · 9 communities
-- Extraction: 88% EXTRACTED · 12% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.6)
+- 237 nodes · 417 edges · 11 communities
+- Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.59)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `fcc4e662`
+- Built from commit: `0f8bb404`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -22,14 +23,16 @@
 - Application
 - RegisterDef
 - ModbusPoller
+- Module Detail
+- Storage Schema — Redis & PostgreSQL
 
 ## God Nodes (most connected - your core abstractions)
 1. `GPIOHandler` - 27 edges
-2. `ModbusPoller` - 21 edges
-3. `RegisterDef` - 18 edges
-4. `MeterConfig` - 17 edges
-5. `Application` - 17 edges
-6. `MeterReading` - 17 edges
+2. `ModbusPoller` - 25 edges
+3. `MeterConfig` - 20 edges
+4. `RegisterDef` - 18 edges
+5. `MeterReading` - 18 edges
+6. `Application` - 17 edges
 7. `Database` - 16 edges
 8. `ModbusBackend` - 15 edges
 9. `RedisPublisher` - 15 edges
@@ -42,23 +45,23 @@
   energy-collector/core/gpio_handler.py → energy-collector/config/settings.py
 - `ModbusPoller` --uses--> `MeterConfig`  [INFERRED]
   energy-collector/core/modbus_client.py → energy-collector/config/settings.py
-- `MockModbusBackend` --uses--> `RegisterDef`  [INFERRED]
-  energy-collector/core/hardware/modbus_backend.py → energy-collector/config/settings.py
-- `ModbusBackend` --uses--> `RegisterDef`  [INFERRED]
-  energy-collector/core/hardware/modbus_backend.py → energy-collector/config/settings.py
+- `ModbusPoller` --uses--> `RegisterDef`  [INFERRED]
+  energy-collector/core/modbus_client.py → energy-collector/config/settings.py
+- `_amain()` --calls--> `get_settings()`  [INFERRED]
+  energy-collector/main.py → energy-collector/config/settings.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (9 total, 0 thin omitted)
+## Communities (11 total, 0 thin omitted)
 
 ### Community 0 - "GPIOHandler"
-Cohesion: 0.08
-Nodes (22): CycleCloseHook, CycleOpenHook, cleanup_gpio(), _gpio_setup_hints(), GPIOHandler, init_gpio(), _new_id(), _now() (+14 more)
+Cohesion: 0.11
+Nodes (14): _gpio_setup_hints(), GPIOHandler, _new_id(), _now(), datetime, State machine sesi & cycle per pin GPIO (per meter).  Optocoupler open-collector, Poll level pin di thread terpisah (sama seperti gpio_reader.py)., Snapshot atomik (state, session_id, cycle_id). (+6 more)
 
 ### Community 1 - "MeterConfig"
-Cohesion: 0.09
-Nodes (17): ABC, MeterConfig, Konfigurasi satu meter dari `meters.yaml`., Hardware abstraction layer — Modbus backend (asli / mock)., create_modbus_backend(), MockModbusBackend, ModbusBackend, ModbusReadError (+9 more)
+Cohesion: 0.07
+Nodes (26): ABC, BaseModel, CycleCloseHook, CycleOpenHook, MeterConfig, Definisi satu register dari `registers.yaml`., Konfigurasi satu meter dari `meters.yaml`.      `type` / `device_type`:       -, RegisterDef (+18 more)
 
 ### Community 2 - "MeterReading"
 Cohesion: 0.09
@@ -69,35 +72,47 @@ Cohesion: 0.20
 Nodes (6): _as_uuid(), Database, datetime, Lapisan PostgreSQL via asyncpg.  - Insert per sample (real-time, bukan batch) sa, Wrapper connection pool asyncpg., UUID
 
 ### Community 4 - "settings.py"
-Cohesion: 0.19
+Cohesion: 0.18
 Nodes (12): BaseSettings, _assert_unique(), get_settings(), load_meters(), load_registers(), Konfigurasi global aplikasi.  Parameter dibaca dari environment / file `.env` vi, Muat daftar meter dari YAML. Raise kalau file/format invalid., Muat register map dari YAML. Raise kalau file/format invalid. (+4 more)
 
 ### Community 5 - "Application"
-Cohesion: 0.18
-Nodes (6): _amain(), Application, main(), Entry point Energy Meter Collection System.  Orkestrasi: load config → init GPIO, Konfigurasi structlog → output JSON ke stdout., setup_logging()
+Cohesion: 0.15
+Nodes (10): cleanup_gpio(), init_gpio(), Inisialisasi global RPi.GPIO (panggil sekali saat startup)., Bersihkan semua pin GPIO (panggil saat shutdown)., _amain(), Application, main(), Entry point Energy Meter Collection System.  Orkestrasi: load config → init GPIO (+2 more)
 
 ### Community 6 - "RegisterDef"
-Cohesion: 0.18
-Nodes (10): BaseModel, Definisi satu register dari `registers.yaml`., RegisterDef, decode_register(), Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind, Decode satu nilai dari list word mentah. Return None kalau gagal., Decode blok response Modbus berdasarkan register map.      Sebuah "blok" adalah, Ekstrak semua register yang alamatnya jatuh di dalam blok ini. (+2 more)
+Cohesion: 0.33
+Nodes (5): decode_register(), Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind, Decode satu nilai dari list word mentah. Return None kalau gagal., Ekstrak semua register yang alamatnya jatuh di dalam blok ini., _words_to_bytes()
 
 ### Community 7 - "ModbusPoller"
-Cohesion: 0.33
-Nodes (4): ModbusPoller, Baca register device_info sekali (best-effort)., Satu poller per meter., Entry point asyncio task.
+Cohesion: 0.24
+Nodes (5): ModbusPoller, Insert 1 snapshot terbaru ke DB tiap interval (tanpa session/cycle)., Baca register device_info sekali (best-effort)., Satu poller per meter., Entry point asyncio task.
+
+### Community 9 - "Module Detail"
+Cohesion: 0.07
+Nodes (26): Alur Program, Catatan Final, `config/meters.yaml`, `config/registers.yaml`, `config/settings.py`, Contoh `.env`, `core/buffer.py`, `core/db.py` (+18 more)
+
+### Community 10 - "Storage Schema — Redis & PostgreSQL"
+Cohesion: 0.13
+Nodes (14): 0. Tipe Device (`device_type`), 1.1 Pola Key, 1.2 `latest` (String) & `readings` (List), 1.3 `device_info` (Hash), 1.4 Contoh Akses (untuk Endpoint), 1. Redis, 2.1 Tabel `meter_readings`, 2.2 Tabel `production_sessions` (+6 more)
+
+## Knowledge Gaps
+- **34 isolated node(s):** `0. Tipe Device (`device_type`)`, `1.1 Pola Key`, `1.2 `latest` (String) & `readings` (List)`, `1.3 `device_info` (Hash)`, `1.4 Contoh Akses (untuk Endpoint)` (+29 more)
+  These have ≤1 connection - possible missing edges or undocumented components.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `GPIOHandler` connect `GPIOHandler` to `MeterConfig`, `MeterReading`, `Application`, `RegisterDef`, `ModbusPoller`?**
-  _High betweenness centrality (0.262) - this node is a cross-community bridge._
-- **Why does `ModbusPoller` connect `ModbusPoller` to `GPIOHandler`, `MeterConfig`, `MeterReading`, `Application`, `RegisterDef`?**
-  _High betweenness centrality (0.236) - this node is a cross-community bridge._
-- **Why does `MeterConfig` connect `MeterConfig` to `GPIOHandler`, `settings.py`, `RegisterDef`, `ModbusPoller`?**
-  _High betweenness centrality (0.137) - this node is a cross-community bridge._
+- **Why does `ModbusPoller` connect `ModbusPoller` to `GPIOHandler`, `MeterConfig`, `MeterReading`, `Application`?**
+  _High betweenness centrality (0.181) - this node is a cross-community bridge._
+- **Why does `GPIOHandler` connect `GPIOHandler` to `MeterConfig`, `MeterReading`, `Application`, `ModbusPoller`?**
+  _High betweenness centrality (0.170) - this node is a cross-community bridge._
+- **Why does `MeterConfig` connect `MeterConfig` to `GPIOHandler`, `settings.py`, `ModbusPoller`?**
+  _High betweenness centrality (0.107) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `GPIOHandler` (e.g. with `MeterConfig` and `ModbusPoller`) actually correct?**
   _`GPIOHandler` has 4 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 11 inferred relationships involving `ModbusPoller` (e.g. with `MeterConfig` and `RegisterDef`) actually correct?**
-  _`ModbusPoller` has 11 INFERRED edges - model-reasoned connections that need verification._
-- **Are the 6 inferred relationships involving `RegisterDef` (e.g. with `MockModbusBackend` and `ModbusBackend`) actually correct?**
-  _`RegisterDef` has 6 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 12 inferred relationships involving `ModbusPoller` (e.g. with `MeterConfig` and `RegisterDef`) actually correct?**
+  _`ModbusPoller` has 12 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 7 inferred relationships involving `MeterConfig` (e.g. with `GPIOHandler` and `State`) actually correct?**
   _`MeterConfig` has 7 INFERRED edges - model-reasoned connections that need verification._
+- **Are the 6 inferred relationships involving `RegisterDef` (e.g. with `MockModbusBackend` and `ModbusBackend`) actually correct?**
+  _`RegisterDef` has 6 INFERRED edges - model-reasoned connections that need verification._

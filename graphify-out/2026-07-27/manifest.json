@@ -5,9 +5,9 @@
     "semantic_hash": "d10a451beab1a24a71a6c25c75631f07"
   },
   "energy-collector/config/settings.py": {
-    "mtime": 1785118594.0528266,
-    "ast_hash": "b27e39c710fc2aacc346c882c7a5034f",
-    "semantic_hash": ""
+    "mtime": 1782959699.0911286,
+    "ast_hash": "67ec174202c141268b03735e6023240f",
+    "semantic_hash": "67ec174202c141268b03735e6023240f"
   },
   "energy-collector/core/__init__.py": {
     "mtime": 1782696440.41591,
@@ -20,14 +20,14 @@
     "semantic_hash": "99ad9275fbf7236e2617971862aafb9a"
   },
   "energy-collector/core/db.py": {
-    "mtime": 1784174562.1091762,
-    "ast_hash": "3a2dcb48fd5e7aafa868005335673f23",
-    "semantic_hash": ""
+    "mtime": 1782957762.6797714,
+    "ast_hash": "b701eb8bfa157cb1b963e7463b09dead",
+    "semantic_hash": "b701eb8bfa157cb1b963e7463b09dead"
   },
   "energy-collector/core/gpio_handler.py": {
-    "mtime": 1785118668.4219694,
-    "ast_hash": "3f3f1226e68a8d0ea513106459ac6365",
-    "semantic_hash": ""
+    "mtime": 1782356512.9197865,
+    "ast_hash": "9e70182b5416a0227f048cab50b78454",
+    "semantic_hash": "9e70182b5416a0227f048cab50b78454"
   },
   "energy-collector/core/hardware/__init__.py": {
     "mtime": 1782355075.7520156,
@@ -40,14 +40,14 @@
     "semantic_hash": "8c5a0c6437cde73637dc8b77d818d855"
   },
   "energy-collector/core/modbus_client.py": {
-    "mtime": 1785118580.066821,
-    "ast_hash": "b7cf9bc7c47090b00408d9ce5c4123ff",
-    "semantic_hash": ""
+    "mtime": 1782891188.7172668,
+    "ast_hash": "b5a5c989246caf952fa0920c1e360927",
+    "semantic_hash": "b5a5c989246caf952fa0920c1e360927"
   },
   "energy-collector/core/redis_publisher.py": {
-    "mtime": 1784174568.1234238,
-    "ast_hash": "52ed204c744d70379556e4fb1f062cf8",
-    "semantic_hash": ""
+    "mtime": 1782891187.7076201,
+    "ast_hash": "2de9161c3a7ad4795373ee653c0d9dff",
+    "semantic_hash": "2de9161c3a7ad4795373ee653c0d9dff"
   },
   "energy-collector/core/register_parser.py": {
     "mtime": 1782268323.2454996,
@@ -55,9 +55,9 @@
     "semantic_hash": "7f74d4c4ee7c30a5560c4ad7c730f117"
   },
   "energy-collector/main.py": {
-    "mtime": 1785118681.5238957,
-    "ast_hash": "a0c32b02572233d9af6e58bd55ac69a2",
-    "semantic_hash": ""
+    "mtime": 1782959699.0538905,
+    "ast_hash": "733803169676e5720812928ad23abf6d",
+    "semantic_hash": "733803169676e5720812928ad23abf6d"
   },
   "energy-collector/models/__init__.py": {
     "mtime": 1782268295.5734808,
@@ -65,43 +65,18 @@
     "semantic_hash": "1a939587769323da96d35c47169aa1c4"
   },
   "energy-collector/models/meter_reading.py": {
-    "mtime": 1785118580.4784384,
-    "ast_hash": "fc9b86cd917e72cfd15dacb8d64d2e8f",
-    "semantic_hash": ""
+    "mtime": 1782268289.8642616,
+    "ast_hash": "683be4b40e4e89bd9228e876782b0d6d",
+    "semantic_hash": "683be4b40e4e89bd9228e876782b0d6d"
   },
   "energy-collector/schema.sql": {
-    "mtime": 1784174604.708827,
-    "ast_hash": "092cdf2aeb4ca8a970099918ce7117d9",
-    "semantic_hash": ""
+    "mtime": 1782957768.099866,
+    "ast_hash": "af58babfe7886d7330b2d86f7ff92c03",
+    "semantic_hash": "af58babfe7886d7330b2d86f7ff92c03"
   },
   "gpio_reader.py": {
     "mtime": 1782356438.0720396,
     "ast_hash": "bcf903954f1f9d5d1b40ad89c1481a93",
     "semantic_hash": "bcf903954f1f9d5d1b40ad89c1481a93"
-  },
-  "energy-collector/STORAGE_SCHEMA.md": {
-    "mtime": 1784174650.6055722,
-    "ast_hash": "bb7ed11c112cfd6489bf9de9b84626ad",
-    "semantic_hash": ""
-  },
-  "energy-collector/config/meters.yaml": {
-    "mtime": 1785118594.4393797,
-    "ast_hash": "624da165bb7332609d48e45add33a035",
-    "semantic_hash": ""
-  },
-  "energy-collector/config/registers.yaml": {
-    "mtime": 1782891068.6730464,
-    "ast_hash": "aee1713fff54518cfbe6db55a7751548",
-    "semantic_hash": ""
-  },
-  "energy-collector/requirements.txt": {
-    "mtime": 1782802824.6065125,
-    "ast_hash": "40026ea8917e65728b4bc721ea076e43",
-    "semantic_hash": ""
-  },
-  "plan.md": {
-    "mtime": 1782793359.5887945,
-    "ast_hash": "c62ab7c4719468818589dba4ecc6343b",
-    "semantic_hash": ""
   }
 }

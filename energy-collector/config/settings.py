@@ -34,7 +34,8 @@ class Settings(BaseSettings):
     buffer_maxlen: int = Field(default=240, alias="BUFFER_MAXLEN")
     cycle_timeout_seconds: float = Field(default=300.0, alias="CYCLE_TIMEOUT_SECONDS")
     poll_interval_ms: int = Field(default=500, alias="POLL_INTERVAL_MS")
-    # Interval persist history ke PostgreSQL untuk meter type=utils (tanpa GPIO/cycle)
+    # Interval persist history ke PostgreSQL (energy & utils). Default 300 = 5 menit.
+    # Energy: tanpa session/cycle di reading; GPIO tetap untuk tabel session/cycle.
     utils_history_interval_seconds: float = Field(
         default=300.0, alias="UTILS_HISTORY_INTERVAL_SECONDS"
     )
@@ -67,7 +68,7 @@ class MeterConfig(BaseModel):
     """Konfigurasi satu meter dari `meters.yaml`.
 
     `type` / `device_type`:
-      - energy — butuh gpio_pin; history DB gated oleh sesi/cycle GPIO
+      - energy — butuh gpio_pin; GPIO track session/cycle; history DB tiap interval
       - utils  — tanpa GPIO/cycle; history DB tiap UTILS_HISTORY_INTERVAL_SECONDS
     """
 
@@ -84,6 +85,7 @@ class MeterConfig(BaseModel):
     device_type: Literal["energy", "utils"] = Field(default="energy", alias="type")
     gpio_pin: Optional[int] = None
     gpio_debounce_ms: int = 50
+    gpio_noise_delay_ms: int = 200
 
     @model_validator(mode="after")
     def _validate_gpio_for_type(self) -> MeterConfig:

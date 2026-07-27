@@ -35,10 +35,8 @@ DeviceType = Literal["energy", "utils"]
 class MeterReading:
     """Satu sample pembacaan dari satu meter.
 
-    Energy: `cycle_id` / `session_id` bernilai None saat state IDLE — sample
-    tetap masuk ring buffer namun tidak di-insert ke DB.
-
-    Utils: session/cycle selalu None; persist history dikontrol interval di poller.
+    Live (buffer/Redis): energy boleh membawa session/cycle dari GPIO.
+    History DB: selalu tanpa session/cycle; interval dikontrol di poller.
     """
 
     meter_id: str
@@ -51,7 +49,7 @@ class MeterReading:
 
     @property
     def is_savable(self) -> bool:
-        """True kalau sample energy punya session & cycle aktif (boleh masuk DB)."""
+        """Legacy: True kalau sample energy punya session & cycle aktif."""
         if self.device_type != "energy":
             return False
         return self.session_id is not None and self.cycle_id is not None

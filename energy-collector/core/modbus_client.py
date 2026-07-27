@@ -3,9 +3,9 @@
 Tiap cycle (default 500ms): baca 2 blok register, parse jadi MeterReading,
 push ke ring buffer + Redis (selalu).
 
-Persist PostgreSQL:
-  - energy — hanya saat state GPIO aktif (session + cycle)
-  - utils  — snapshot terbaru tiap UTILS_HISTORY_INTERVAL_SECONDS (tanpa cycle)
+Persist PostgreSQL: snapshot terbaru tiap UTILS_HISTORY_INTERVAL_SECONDS
+(tanpa session/cycle) untuk energy maupun utils. GPIO tetap hanya untuk
+tracking session/cycle di tabel terpisah.
 """
 from __future__ import annotations
 
@@ -60,7 +60,7 @@ class ModbusPoller:
         self.poll_interval = poll_interval_seconds
         self.db = db
         self.redis = redis
-        self.utils_history_interval = utils_history_interval_seconds
+        self.history_interval = utils_history_interval_seconds
 
         self._stop = asyncio.Event()
         self._log = log.bind(
@@ -70,7 +70,7 @@ class ModbusPoller:
         )
         self.device_info: dict[str, Optional[float]] = {}
         self._started_monotonic: Optional[float] = None
-        self._last_utils_history_at: Optional[float] = None
+        self._last_history_at: Optional[float] = None
 
     def stop(self) -> None:
         self._stop.set()
@@ -151,17 +151,14 @@ class ModbusPoller:
         if self.db is None:
             return
 
-        if self.meter.is_utils:
-            await self._maybe_persist_utils_history(reading)
-        elif reading.is_savable:
-            await self.db.insert_reading(reading)
+        await self._maybe_persist_history(reading)
 
-    async def _maybe_persist_utils_history(self, reading: MeterReading) -> None:
+    async def _maybe_persist_history(self, reading: MeterReading) -> None:
         """Insert 1 snapshot terbaru ke DB tiap interval (tanpa session/cycle)."""
         now = asyncio.get_running_loop().time()
         if (
-            self._last_utils_history_at is not None
-            and (now - self._last_utils_history_at) < self.utils_history_interval
+            self._last_history_at is not None
+            and (now - self._last_history_at) < self.history_interval
         ):
             return
 
@@ -170,14 +167,14 @@ class ModbusPoller:
             timestamp=reading.timestamp,
             session_id=None,
             cycle_id=None,
-            device_type="utils",
+            device_type=reading.device_type,
             values=reading.values,
         )
         await self.db.insert_reading(history)
-        self._last_utils_history_at = now
+        self._last_history_at = now
         self._log.info(
-            "utils_history_persisted",
-            interval_seconds=self.utils_history_interval,
+            "history_persisted",
+            interval_seconds=self.history_interval,
             timestamp=history.timestamp.isoformat(),
         )
 

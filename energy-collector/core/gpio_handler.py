@@ -3,14 +3,14 @@
 Optocoupler open-collector: pin default HIGH (idle), LOW = mesin aktif.
 
   IDLE --falling--> SAVING --rising--> COOLING --falling--> SAVING ...
-                                          \--timeout--> IDLE
+                                          \\--timeout--> IDLE
 
 Transisi memanggil hook (on_session_start/end, on_cycle_open/close) yang
 di-wire oleh main.py untuk menulis ke tabel tracking DB. Hook dipanggil dari
 thread polling GPIO, jadi implementasinya harus thread-safe / non-blocking.
 
-Pembacaan GPIO mengikuti pola gpio_reader.py: BCM, setup INPUT tanpa pull-up,
-poll level via GPIO.input() di thread terpisah.
+Edge hanya di-commit ke state machine setelah level stabil selama
+gpio_noise_delay_ms (anti-glitch). Debounce tetap membatasi edge berturut.
 """
 from __future__ import annotations
 
@@ -120,20 +120,25 @@ class GPIOHandler:
         self._timeout_timer: Optional[threading.Timer] = None
         self._poll_thread: Optional[threading.Thread] = None
         self._poll_stop = threading.Event()
-        self._last_level: Optional[int] = None
+        self._confirmed_level: Optional[int] = None
+        self._pending_level: Optional[int] = None
+        self._pending_since = 0.0
         self._last_edge_time = 0.0
         self._debounce_seconds = 0.05
+        self._noise_delay_seconds = 0.2
 
         self._log = log.bind(meter_id=meter.id, gpio_pin=self.pin)
 
     # ── Setup / teardown ─────────────────────────────────────
     def setup(self) -> None:
         debounce_ms = max(1, self.meter.gpio_debounce_ms)
+        noise_ms = max(0, self.meter.gpio_noise_delay_ms)
         self._debounce_seconds = debounce_ms / 1000.0
+        self._noise_delay_seconds = noise_ms / 1000.0
 
         GPIO.setup(self.pin, GPIO.IN)
 
-        if not self._start_polling(debounce_ms):
+        if not self._start_polling(debounce_ms, noise_ms):
             hints = _gpio_setup_hints(self.pin)
             self._log.error("gpio_setup_failed", hints=hints)
             raise RuntimeError(
@@ -146,12 +151,13 @@ class GPIOHandler:
             state=self._state.value,
             level="LOW" if level == GPIO.LOW else "HIGH",
             gpio_level=level,
+            noise_delay_ms=noise_ms,
         )
 
-    def _start_polling(self, debounce_ms: int) -> bool:
+    def _start_polling(self, debounce_ms: int, noise_ms: int) -> bool:
         """Poll level pin di thread terpisah (sama seperti gpio_reader.py)."""
         try:
-            self._last_level = GPIO.input(self.pin)
+            self._confirmed_level = GPIO.input(self.pin)
         except Exception as exc:
             self._log.error("gpio_poll_init_failed", error=str(exc))
             return False
@@ -163,7 +169,11 @@ class GPIOHandler:
             daemon=True,
         )
         self._poll_thread.start()
-        self._log.info("gpio_polling_started", debounce_ms=debounce_ms)
+        self._log.info(
+            "gpio_polling_started",
+            debounce_ms=debounce_ms,
+            noise_delay_ms=noise_ms,
+        )
         return True
 
     def _poll_loop(self) -> None:
@@ -176,14 +186,22 @@ class GPIOHandler:
                     return
                 continue
 
-            if level != self._last_level:
-                now = time.monotonic()
-                if now - self._last_edge_time >= self._debounce_seconds:
+            now = time.monotonic()
+            if level != self._confirmed_level:
+                if self._pending_level != level:
+                    # kandidat baru / glitch balik arah → reset timer noise
+                    self._pending_level = level
+                    self._pending_since = now
+                elif (
+                    now - self._pending_since >= self._noise_delay_seconds
+                    and now - self._last_edge_time >= self._debounce_seconds
+                ):
                     self._last_edge_time = now
-                    self._last_level = level
-                    self._on_edge(self.pin)
-                else:
-                    self._last_level = level
+                    self._confirmed_level = level
+                    self._pending_level = None
+                    self._on_confirmed_edge(level)
+            else:
+                self._pending_level = None
 
             if self._poll_stop.wait(0.01):
                 return
@@ -211,13 +229,8 @@ class GPIOHandler:
         with self._lock:
             return self._state in (State.SAVING, State.COOLING)
 
-    # ── Callback edge GPIO ───────────────────────────────────
-    def _on_edge(self, channel) -> None:
-        try:
-            level = GPIO.input(self.pin)
-        except Exception:  # pragma: no cover
-            self._log.exception("gpio_input_failed")
-            return
+    # ── Callback edge GPIO (setelah noise delay) ─────────────
+    def _on_confirmed_edge(self, level: int) -> None:
         with self._lock:
             state_before = self._state.value
         self._log.info(
