@@ -35,8 +35,8 @@ DeviceType = Literal["energy", "utils"]
 class MeterReading:
     """Satu sample pembacaan dari satu meter.
 
-    Live (buffer/Redis): energy boleh membawa session/cycle dari GPIO.
-    History DB: selalu tanpa session/cycle; interval dikontrol di poller.
+    Live (buffer/Redis): session_id lifetime aplikasi; energy boleh bawa cycle_id GPIO.
+    History DB: session_id lifetime + tanpa cycle_id; interval di poller.
     """
 
     meter_id: str

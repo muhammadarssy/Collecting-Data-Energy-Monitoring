@@ -1,16 +1,12 @@
-"""State machine sesi & cycle per pin GPIO (per meter).
+"""State machine cycle per pin GPIO (per meter).
 
 Optocoupler open-collector: pin default HIGH (idle), LOW = mesin aktif.
 
-  IDLE --falling--> SAVING --rising--> COOLING --falling--> SAVING ...
-                                          \\--timeout--> IDLE
+  IDLE --LOW--> SAVING --HIGH stabil >= noise_delay--> IDLE (1 cycle)
+                  \\--HIGH singkat--> tetap SAVING (noise, digabung)
+                  \\--LOW >= standby_low--> abort; HIGH --> IDLE (standby)
 
-Transisi memanggil hook (on_session_start/end, on_cycle_open/close) yang
-di-wire oleh main.py untuk menulis ke tabel tracking DB. Hook dipanggil dari
-thread polling GPIO, jadi implementasinya harus thread-safe / non-blocking.
-
-Edge hanya di-commit ke state machine setelah level stabil selama
-gpio_noise_delay_ms (anti-glitch). Debounce tetap membatasi edge berturut.
+Session hidup selama proses collector; GPIO hanya buka/tutup cycle.
 """
 from __future__ import annotations
 
@@ -28,7 +24,6 @@ from config.settings import MeterConfig
 
 log = structlog.get_logger(__name__)
 
-# BCM pin yang bentrok dengan interface bawaan Pi.
 _I2C_PINS = frozenset({2, 3})
 _SPI_PINS = frozenset({7, 8, 9, 10, 11})
 _UART_PINS = frozenset({14, 15})
@@ -37,7 +32,7 @@ _UART_PINS = frozenset({14, 15})
 class State(str, enum.Enum):
     IDLE = "IDLE"
     SAVING = "SAVING"
-    COOLING = "COOLING"
+    ABORT_WAIT = "ABORT_WAIT"  # LOW terlalu lama; tunggu HIGH → standby
 
 
 def _now() -> datetime:
@@ -67,35 +62,28 @@ def _gpio_setup_hints(pin: int) -> list[str]:
 
 
 def init_gpio() -> None:
-    """Inisialisasi global RPi.GPIO (panggil sekali saat startup)."""
     GPIO.setmode(GPIO.BCM)
     log.info("gpio_init", mode="BCM")
 
 
 def cleanup_gpio() -> None:
-    """Bersihkan semua pin GPIO (panggil saat shutdown)."""
     try:
         GPIO.cleanup()
     except Exception:
         pass
 
 
-# Tipe hook (semua argumen keyword-friendly via posisi yang stabil).
-SessionStartHook = Callable[[str, str, datetime], None]          # meter_id, session_id, start
-SessionEndHook = Callable[[str, str, datetime, int], None]       # meter_id, session_id, end, total_cycles
-CycleOpenHook = Callable[[str, str, str, datetime], None]        # meter_id, session_id, cycle_id, start
-CycleCloseHook = Callable[[str, str, datetime], None]            # meter_id, cycle_id, end
+CycleOpenHook = Callable[[str, str, str, datetime], None]
+CycleCloseHook = Callable[[str, str, datetime], None]
 
 
 class GPIOHandler:
-    """Kelola satu pin dan state sesi/cycle-nya."""
+    """Kelola satu pin dan cycle-nya di dalam session aplikasi."""
 
     def __init__(
         self,
         meter: MeterConfig,
-        cycle_timeout_seconds: float,
-        on_session_start: Optional[SessionStartHook] = None,
-        on_session_end: Optional[SessionEndHook] = None,
+        session_id: str,
         on_cycle_open: Optional[CycleOpenHook] = None,
         on_cycle_close: Optional[CycleCloseHook] = None,
     ) -> None:
@@ -103,42 +91,39 @@ class GPIOHandler:
         if meter.gpio_pin is None:
             raise ValueError(f"GPIOHandler butuh gpio_pin untuk meter '{meter.id}'")
         self.pin = meter.gpio_pin
-        self.cycle_timeout_seconds = cycle_timeout_seconds
+        self._session_id = session_id
 
-        self._on_session_start = on_session_start
-        self._on_session_end = on_session_end
         self._on_cycle_open = on_cycle_open
         self._on_cycle_close = on_cycle_close
 
         self._lock = threading.RLock()
         self._state = State.IDLE
-        self._session_id: Optional[str] = None
         self._cycle_id: Optional[str] = None
         self._cycle_start: Optional[datetime] = None
-        self._session_start: Optional[datetime] = None
         self._cycle_count = 0
-        self._timeout_timer: Optional[threading.Timer] = None
+        self._end_timer: Optional[threading.Timer] = None
+        self._standby_timer: Optional[threading.Timer] = None
         self._poll_thread: Optional[threading.Thread] = None
         self._poll_stop = threading.Event()
-        self._confirmed_level: Optional[int] = None
-        self._pending_level: Optional[int] = None
-        self._pending_since = 0.0
-        self._last_edge_time = 0.0
+        self._last_level: Optional[int] = None
+        self._last_change_mono = 0.0
         self._debounce_seconds = 0.05
-        self._noise_delay_seconds = 0.2
+        self._noise_delay_seconds = 0.5
+        self._standby_low_seconds = 30.0
 
-        self._log = log.bind(meter_id=meter.id, gpio_pin=self.pin)
+        self._log = log.bind(meter_id=meter.id, gpio_pin=self.pin, session_id=session_id)
 
-    # ── Setup / teardown ─────────────────────────────────────
     def setup(self) -> None:
         debounce_ms = max(1, self.meter.gpio_debounce_ms)
-        noise_ms = max(0, self.meter.gpio_noise_delay_ms)
+        noise_ms = max(1, self.meter.gpio_noise_delay_ms)
+        standby_s = max(1.0, float(self.meter.gpio_standby_low_seconds))
         self._debounce_seconds = debounce_ms / 1000.0
         self._noise_delay_seconds = noise_ms / 1000.0
+        self._standby_low_seconds = standby_s
 
         GPIO.setup(self.pin, GPIO.IN)
 
-        if not self._start_polling(debounce_ms, noise_ms):
+        if not self._start_polling(debounce_ms, noise_ms, standby_s):
             hints = _gpio_setup_hints(self.pin)
             self._log.error("gpio_setup_failed", hints=hints)
             raise RuntimeError(
@@ -152,12 +137,13 @@ class GPIOHandler:
             level="LOW" if level == GPIO.LOW else "HIGH",
             gpio_level=level,
             noise_delay_ms=noise_ms,
+            standby_low_seconds=standby_s,
         )
 
-    def _start_polling(self, debounce_ms: int, noise_ms: int) -> bool:
-        """Poll level pin di thread terpisah (sama seperti gpio_reader.py)."""
+    def _start_polling(self, debounce_ms: int, noise_ms: int, standby_s: float) -> bool:
         try:
-            self._confirmed_level = GPIO.input(self.pin)
+            self._last_level = GPIO.input(self.pin)
+            self._last_change_mono = time.monotonic()
         except Exception as exc:
             self._log.error("gpio_poll_init_failed", error=str(exc))
             return False
@@ -173,6 +159,7 @@ class GPIOHandler:
             "gpio_polling_started",
             debounce_ms=debounce_ms,
             noise_delay_ms=noise_ms,
+            standby_low_seconds=standby_s,
         )
         return True
 
@@ -187,50 +174,55 @@ class GPIOHandler:
                 continue
 
             now = time.monotonic()
-            if level != self._confirmed_level:
-                if self._pending_level != level:
-                    # kandidat baru / glitch balik arah → reset timer noise
-                    self._pending_level = level
-                    self._pending_since = now
-                elif (
-                    now - self._pending_since >= self._noise_delay_seconds
-                    and now - self._last_edge_time >= self._debounce_seconds
-                ):
-                    self._last_edge_time = now
-                    self._confirmed_level = level
-                    self._pending_level = None
-                    self._on_confirmed_edge(level)
-            else:
-                self._pending_level = None
+            if level != self._last_level:
+                # debounce: abaikan perubahan lebih cepat dari debounce
+                if now - self._last_change_mono >= self._debounce_seconds:
+                    prev = self._last_level
+                    self._last_level = level
+                    self._last_change_mono = now
+                    if prev is not None:
+                        self._on_level(level)
 
             if self._poll_stop.wait(0.01):
                 return
 
-    def teardown(self) -> None:
+    def teardown(self) -> Optional[tuple[str, str, datetime]]:
+        pending: Optional[tuple[str, str, datetime]] = None
         with self._lock:
-            self._cancel_timer()
+            self._cancel_end_timer()
+            self._cancel_standby_timer()
+            if self._cycle_id is not None:
+                end = _now()
+                pending = (self.meter.id, self._cycle_id, end)
+                self._log.info("cycle_close", cycle_id=self._cycle_id, reason="teardown")
+                self._cycle_id = None
+                self._cycle_start = None
+                self._state = State.IDLE
         self._poll_stop.set()
         if self._poll_thread is not None:
             self._poll_thread.join(timeout=1.0)
+        return pending
 
-    # ── Akses thread-safe untuk polling loop ─────────────────
     @property
     def state(self) -> State:
         with self._lock:
             return self._state
 
+    @property
+    def cycle_count(self) -> int:
+        with self._lock:
+            return self._cycle_count
+
     def context(self) -> tuple[State, Optional[str], Optional[str]]:
-        """Snapshot atomik (state, session_id, cycle_id)."""
         with self._lock:
             return self._state, self._session_id, self._cycle_id
 
     @property
     def is_saving(self) -> bool:
         with self._lock:
-            return self._state in (State.SAVING, State.COOLING)
+            return self._state == State.SAVING
 
-    # ── Callback edge GPIO (setelah noise delay) ─────────────
-    def _on_confirmed_edge(self, level: int) -> None:
+    def _on_level(self, level: int) -> None:
         with self._lock:
             state_before = self._state.value
         self._log.info(
@@ -240,47 +232,76 @@ class GPIOHandler:
             state=state_before,
         )
         if level == GPIO.LOW:
-            self._handle_falling()
+            self._handle_low()
         else:
-            self._handle_rising()
+            self._handle_high()
 
-    def _handle_falling(self) -> None:
-        """HIGH -> LOW: mulai sesi / tutup cycle lama buka cycle baru."""
+    def _handle_low(self) -> None:
+        """LOW: mulai cycle dari IDLE, atau batalkan end-timer (noise HIGH singkat)."""
         with self._lock:
             if self._state == State.IDLE:
-                self._start_session()
-            elif self._state == State.COOLING:
-                self._cancel_timer()
-                self._close_cycle()
                 self._open_cycle()
                 self._state = State.SAVING
-            # SAVING + falling: abaikan (sudah aktif)
+                self._start_standby_timer()
+            elif self._state == State.SAVING:
+                # HIGH noise berakhir → lanjut cycle, restart timer LOW-mati
+                self._cancel_end_timer()
+                self._start_standby_timer()
+            # ABORT_WAIT + LOW: tetap tunggu HIGH
 
-    def _handle_rising(self) -> None:
-        """LOW -> HIGH: masuk fase cooling, mulai timeout."""
+    def _handle_high(self) -> None:
+        """HIGH: jika noise → end-timer; jika abort wait → standby IDLE."""
         with self._lock:
             if self._state == State.SAVING:
-                self._state = State.COOLING
-                self._start_timer()
+                self._cancel_standby_timer()
+                # HIGH singkat = noise; tutup cycle hanya jika stabil >= noise_delay
+                self._start_end_timer()
+            elif self._state == State.ABORT_WAIT:
+                self._state = State.IDLE
+                self._log.info("standby_reset", reason="machine_off_low_then_high")
 
-    def _on_timeout(self) -> None:
-        """HIGH terlalu lama -> tutup cycle & sesi, kembali IDLE."""
+    def _on_end_timer(self) -> None:
+        """HIGH stabil cukup lama → 1 cycle selesai."""
         with self._lock:
-            if self._state != State.COOLING:
+            if self._state != State.SAVING or self._cycle_id is None:
+                return
+            # pastikan pin masih HIGH
+            try:
+                if GPIO.input(self.pin) != GPIO.HIGH:
+                    return
+            except Exception:
                 return
             self._close_cycle()
-            self._end_session()
             self._state = State.IDLE
+            self._cancel_standby_timer()
 
-    # ── Transisi internal (dipanggil saat lock dipegang) ─────
-    def _start_session(self) -> None:
-        self._session_id = _new_id()
-        self._session_start = _now()
-        self._cycle_count = 0
-        self._state = State.SAVING
-        self._log.info("session_start", session_id=self._session_id)
-        self._safe_hook(self._on_session_start, self.meter.id, self._session_id, self._session_start)
-        self._open_cycle()
+    def _on_standby_timer(self) -> None:
+        """LOW terus-menerus terlalu lama → mesin mati, abort cycle."""
+        with self._lock:
+            if self._state != State.SAVING:
+                return
+            try:
+                if GPIO.input(self.pin) != GPIO.LOW:
+                    return
+            except Exception:
+                return
+            if self._cycle_id is not None:
+                # batalkan cycle (tutup DB agar tidak menggantung), kurangi hitungan produksi
+                cid = self._cycle_id
+                end = _now()
+                self._log.info(
+                    "cycle_abort",
+                    cycle_id=cid,
+                    reason="standby_low",
+                    standby_low_seconds=self._standby_low_seconds,
+                )
+                self._safe_hook(self._on_cycle_close, self.meter.id, cid, end)
+                self._cycle_id = None
+                self._cycle_start = None
+                if self._cycle_count > 0:
+                    self._cycle_count -= 1
+            self._cancel_end_timer()
+            self._state = State.ABORT_WAIT
 
     def _open_cycle(self) -> None:
         self._cycle_id = _new_id()
@@ -303,34 +324,29 @@ class GPIOHandler:
         self._cycle_id = None
         self._cycle_start = None
 
-    def _end_session(self) -> None:
-        if self._session_id is None:
-            return
-        end = _now()
-        duration = (end - self._session_start).total_seconds() if self._session_start else 0.0
-        self._log.info(
-            "session_end",
-            session_id=self._session_id,
-            total_cycles=self._cycle_count,
-            duration_seconds=round(duration, 2),
-        )
-        self._safe_hook(
-            self._on_session_end, self.meter.id, self._session_id, end, self._cycle_count
-        )
-        self._session_id = None
-        self._session_start = None
+    def _start_end_timer(self) -> None:
+        self._cancel_end_timer()
+        self._end_timer = threading.Timer(self._noise_delay_seconds, self._on_end_timer)
+        self._end_timer.daemon = True
+        self._end_timer.start()
 
-    # ── Timer ────────────────────────────────────────────────
-    def _start_timer(self) -> None:
-        self._cancel_timer()
-        self._timeout_timer = threading.Timer(self.cycle_timeout_seconds, self._on_timeout)
-        self._timeout_timer.daemon = True
-        self._timeout_timer.start()
+    def _cancel_end_timer(self) -> None:
+        if self._end_timer is not None:
+            self._end_timer.cancel()
+            self._end_timer = None
 
-    def _cancel_timer(self) -> None:
-        if self._timeout_timer is not None:
-            self._timeout_timer.cancel()
-            self._timeout_timer = None
+    def _start_standby_timer(self) -> None:
+        self._cancel_standby_timer()
+        self._standby_timer = threading.Timer(
+            self._standby_low_seconds, self._on_standby_timer
+        )
+        self._standby_timer.daemon = True
+        self._standby_timer.start()
+
+    def _cancel_standby_timer(self) -> None:
+        if self._standby_timer is not None:
+            self._standby_timer.cancel()
+            self._standby_timer = None
 
     @staticmethod
     def _safe_hook(hook, *args) -> None:

@@ -68,8 +68,8 @@ class MeterConfig(BaseModel):
     """Konfigurasi satu meter dari `meters.yaml`.
 
     `type` / `device_type`:
-      - energy — butuh gpio_pin; GPIO track session/cycle; history DB tiap interval
-      - utils  — tanpa GPIO/cycle; history DB tiap UTILS_HISTORY_INTERVAL_SECONDS
+      - energy — butuh gpio_pin; session lifetime app; GPIO track cycle; history tiap interval
+      - utils  — tanpa GPIO/cycle; session lifetime app; history tiap UTILS_HISTORY_INTERVAL_SECONDS
     """
 
     model_config = ConfigDict(populate_by_name=True)
@@ -85,7 +85,10 @@ class MeterConfig(BaseModel):
     device_type: Literal["energy", "utils"] = Field(default="energy", alias="type")
     gpio_pin: Optional[int] = None
     gpio_debounce_ms: int = 50
-    gpio_noise_delay_ms: int = 200
+    # HIGH harus stabil selama ini agar cycle ditutup (pulse HIGH lebih pendek = noise).
+    gpio_noise_delay_ms: int = 500
+    # LOW terus-menerus selama ini = mesin mati; HIGH berikutnya reset standby.
+    gpio_standby_low_seconds: float = 30.0
 
     @model_validator(mode="after")
     def _validate_gpio_for_type(self) -> MeterConfig:

@@ -3,9 +3,8 @@
 Tiap cycle (default 500ms): baca 2 blok register, parse jadi MeterReading,
 push ke ring buffer + Redis (selalu).
 
-Persist PostgreSQL: snapshot terbaru tiap UTILS_HISTORY_INTERVAL_SECONDS
-(tanpa session/cycle) untuk energy maupun utils. GPIO tetap hanya untuk
-tracking session/cycle di tabel terpisah.
+Persist PostgreSQL: snapshot tiap UTILS_HISTORY_INTERVAL_SECONDS dengan
+session_id lifetime aplikasi (tanpa cycle_id). GPIO hanya track cycle.
 """
 from __future__ import annotations
 
@@ -47,6 +46,7 @@ class ModbusPoller:
         buffer: RingBuffer,
         gpio_handler: Optional[GPIOHandler],
         poll_interval_seconds: float,
+        session_id: str,
         db=None,
         redis: Optional[RedisPublisher] = None,
         utils_history_interval_seconds: float = 300.0,
@@ -58,6 +58,7 @@ class ModbusPoller:
         self.buffer = buffer
         self.gpio = gpio_handler
         self.poll_interval = poll_interval_seconds
+        self.session_id = session_id
         self.db = db
         self.redis = redis
         self.history_interval = utils_history_interval_seconds
@@ -67,6 +68,7 @@ class ModbusPoller:
             meter_id=meter.id,
             port=meter.port,
             device_type=meter.device_type,
+            session_id=session_id,
         )
         self.device_info: dict[str, Optional[float]] = {}
         self._started_monotonic: Optional[float] = None
@@ -106,10 +108,11 @@ class ModbusPoller:
         self._log.info("poller_stopped")
 
     def _gpio_context(self) -> tuple[str, Optional[str], Optional[str]]:
+        """(gpio_state, session_id, cycle_id). Session selalu dari lifetime app."""
         if self.gpio is None:
-            return State.IDLE.value, None, None
-        state, session_id, cycle_id = self.gpio.context()
-        return state.value, session_id, cycle_id
+            return State.IDLE.value, self.session_id, None
+        state, _, cycle_id = self.gpio.context()
+        return state.value, self.session_id, cycle_id
 
     def _running_seconds(self) -> Optional[float]:
         if self._started_monotonic is None:
@@ -154,7 +157,7 @@ class ModbusPoller:
         await self._maybe_persist_history(reading)
 
     async def _maybe_persist_history(self, reading: MeterReading) -> None:
-        """Insert 1 snapshot terbaru ke DB tiap interval (tanpa session/cycle)."""
+        """Insert 1 snapshot ke DB tiap interval (dengan session, tanpa cycle)."""
         now = asyncio.get_running_loop().time()
         if (
             self._last_history_at is not None
@@ -165,7 +168,7 @@ class ModbusPoller:
         history = MeterReading(
             meter_id=reading.meter_id,
             timestamp=reading.timestamp,
-            session_id=None,
+            session_id=self.session_id,
             cycle_id=None,
             device_type=reading.device_type,
             values=reading.values,

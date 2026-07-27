@@ -1,7 +1,9 @@
 """Entry point Energy Meter Collection System.
 
-Orkestrasi: load config → init GPIO/DB → spawn polling task per meter →
-tangani shutdown bersih (SIGINT/SIGTERM).
+Orkestrasi: load config → init GPIO/DB → spawn session per meter →
+polling task → tangani shutdown bersih (SIGINT/SIGTERM).
+
+Session per meter hidup dari start sampai shutdown; GPIO energy hanya cycle.
 """
 from __future__ import annotations
 
@@ -9,6 +11,8 @@ import asyncio
 import logging
 import signal
 import sys
+import uuid
+from datetime import datetime, timezone
 from functools import partial
 from typing import Optional
 
@@ -122,20 +126,24 @@ class Application:
                 if not await self.redis.connect():
                     self.redis = None
 
-        # 4. Per meter: buffer → gpio (energy) → backend → poller
+        # 4. Per meter: session lifetime → gpio (energy) → backend → poller
         parser = RegisterParser(register_map)
         force_mock = s.use_mock_hardware
+        session_start = datetime.now(timezone.utc)
 
         for meter in meters:
             buffer = RingBuffer(maxlen=s.buffer_maxlen)
             handler: Optional[GPIOHandler] = None
+            session_id = str(uuid.uuid4())
+
+            if self.db is not None:
+                await self.db.start_session(meter.id, session_id, session_start)
+            log.info("session_start", meter_id=meter.id, session_id=session_id)
 
             if meter.is_energy:
                 handler = GPIOHandler(
                     meter=meter,
-                    cycle_timeout_seconds=s.cycle_timeout_seconds,
-                    on_session_start=lambda *a: self._schedule(self._db_start_session, *a),
-                    on_session_end=lambda *a: self._schedule(self._db_end_session, *a),
+                    session_id=session_id,
                     on_cycle_open=lambda *a: self._schedule(self._db_open_cycle, *a),
                     on_cycle_close=lambda *a: self._schedule(self._db_close_cycle, *a),
                 )
@@ -151,6 +159,7 @@ class Application:
                 buffer=buffer,
                 gpio_handler=handler,
                 poll_interval_seconds=s.poll_interval_seconds,
+                session_id=session_id,
                 db=self.db,
                 redis=self.redis,
                 utils_history_interval_seconds=s.utils_history_interval_seconds,
@@ -178,10 +187,29 @@ class Application:
         log.info("shutdown_complete")
 
     async def _cleanup(self) -> None:
+        # Tutup cycle terbuka dulu (await), lalu end session lifetime
         for h in self.gpio_handlers:
-            h.teardown()
+            pending = h.teardown()
+            if pending is not None and self.db is not None:
+                meter_id, cycle_id, end = pending
+                await self.db.close_cycle(meter_id, cycle_id, end)
         if self._gpio_initialized:
             cleanup_gpio()
+
+        if self.db is not None:
+            end = datetime.now(timezone.utc)
+            gpio_by_meter = {h.meter.id: h for h in self.gpio_handlers}
+            for p in self.pollers:
+                handler = gpio_by_meter.get(p.meter.id)
+                total_cycles = handler.cycle_count if handler is not None else 0
+                await self.db.end_session(p.meter.id, p.session_id, end, total_cycles)
+                log.info(
+                    "session_end",
+                    meter_id=p.meter.id,
+                    session_id=p.session_id,
+                    total_cycles=total_cycles,
+                )
+
         if self.redis is not None:
             await self.redis.close()
         if self.db is not None:
@@ -191,13 +219,7 @@ class Application:
         log.info("signal_received", signal=signame)
         self._shutdown.set()
 
-    # ── Coroutine factory untuk hook (dipanggil via run_coroutine_threadsafe) ─
-    async def _db_start_session(self, meter_id, session_id, start):
-        await self.db.start_session(meter_id, session_id, start)
-
-    async def _db_end_session(self, meter_id, session_id, end, total_cycles):
-        await self.db.end_session(meter_id, session_id, end, total_cycles)
-
+    # ── Coroutine factory untuk hook cycle (dari thread GPIO) ─
     async def _db_open_cycle(self, meter_id, session_id, cycle_id, start):
         await self.db.open_cycle(meter_id, session_id, cycle_id, start)
 

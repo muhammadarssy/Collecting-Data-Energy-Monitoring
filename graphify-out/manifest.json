@@ -5,8 +5,8 @@
     "semantic_hash": "d10a451beab1a24a71a6c25c75631f07"
   },
   "energy-collector/config/settings.py": {
-    "mtime": 1785118594.0528266,
-    "ast_hash": "b27e39c710fc2aacc346c882c7a5034f",
+    "mtime": 1785124523.8661463,
+    "ast_hash": "4c2fb3a0b48544e0af95512e3de48cc0",
     "semantic_hash": ""
   },
   "energy-collector/core/__init__.py": {
@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "energy-collector/core/gpio_handler.py": {
-    "mtime": 1785118668.4219694,
-    "ast_hash": "3f3f1226e68a8d0ea513106459ac6365",
+    "mtime": 1785124523.250728,
+    "ast_hash": "329b22adc5ac9c24000bcac8f0c7255b",
     "semantic_hash": ""
   },
   "energy-collector/core/hardware/__init__.py": {
@@ -40,8 +40,8 @@
     "semantic_hash": "8c5a0c6437cde73637dc8b77d818d855"
   },
   "energy-collector/core/modbus_client.py": {
-    "mtime": 1785118580.066821,
-    "ast_hash": "b7cf9bc7c47090b00408d9ce5c4123ff",
+    "mtime": 1785120869.1478004,
+    "ast_hash": "3e067203cffaad05abf7bc9d29a570d1",
     "semantic_hash": ""
   },
   "energy-collector/core/redis_publisher.py": {
@@ -55,8 +55,8 @@
     "semantic_hash": "7f74d4c4ee7c30a5560c4ad7c730f117"
   },
   "energy-collector/main.py": {
-    "mtime": 1785118681.5238957,
-    "ast_hash": "a0c32b02572233d9af6e58bd55ac69a2",
+    "mtime": 1785124527.841087,
+    "ast_hash": "00c4588b45fe0280704d158b8c8c2207",
     "semantic_hash": ""
   },
   "energy-collector/models/__init__.py": {
@@ -65,8 +65,8 @@
     "semantic_hash": "1a939587769323da96d35c47169aa1c4"
   },
   "energy-collector/models/meter_reading.py": {
-    "mtime": 1785118580.4784384,
-    "ast_hash": "fc9b86cd917e72cfd15dacb8d64d2e8f",
+    "mtime": 1785120896.0655403,
+    "ast_hash": "54d6ed95ab42f292ac93ec48c250b1a2",
     "semantic_hash": ""
   },
   "energy-collector/schema.sql": {
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "energy-collector/config/meters.yaml": {
-    "mtime": 1785118594.4393797,
-    "ast_hash": "624da165bb7332609d48e45add33a035",
+    "mtime": 1785124528.1520584,
+    "ast_hash": "afe9aa2ce077578cf97ceb37872923b9",
     "semantic_hash": ""
   },
   "energy-collector/config/registers.yaml": {

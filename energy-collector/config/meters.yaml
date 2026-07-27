@@ -1,6 +1,7 @@
 meters:
-  # Energy: history DB tiap UTILS_HISTORY_INTERVAL_SECONDS (tanpa session/cycle).
-  # GPIO hanya untuk tracking session/cycle; gpio_noise_delay_ms filter glitch.
+  # Energy: history DB tiap interval (session lifetime, tanpa cycle_id di reading).
+  # GPIO cycle: LOW pertama buka cycle; HIGH singkat = noise (digabung);
+  # HIGH >= gpio_noise_delay_ms tutup 1 cycle; LOW >= gpio_standby_low_seconds = mati → reset standby.
   # - id: meter_01
   #   label: "Mesin Injeksi 1"
   #   type: energy
@@ -11,7 +12,8 @@ meters:
   #   stopbits: 1
   #   gpio_pin: 3
   #   gpio_debounce_ms: 50
-  #   gpio_noise_delay_ms: 200
+  #   gpio_noise_delay_ms: 500
+  #   gpio_standby_low_seconds: 30
 
   - id: meter_id3
     label: "Mesin Injeksi 3"
@@ -22,8 +24,9 @@ meters:
     parity: N
     stopbits: 1
     gpio_pin: 17
-    gpio_debounce_ms: 500
-    gpio_noise_delay_ms: 1000
+    gpio_debounce_ms: 50
+    gpio_noise_delay_ms: 500
+    gpio_standby_low_seconds: 30
 
   - id: meter_id4
     label: "Mesin Injeksi 4"
@@ -34,8 +37,9 @@ meters:
     parity: N
     stopbits: 1
     gpio_pin: 27
-    gpio_debounce_ms: 500
-    gpio_noise_delay_ms: 1000
+    gpio_debounce_ms: 50
+    gpio_noise_delay_ms: 500
+    gpio_standby_low_seconds: 30
 
   - id: utils_id5
     label: "Panel Utilitas 5"
