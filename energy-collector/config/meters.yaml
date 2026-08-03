@@ -24,8 +24,8 @@ meters:
     parity: N
     stopbits: 1
     gpio_pin: 17
-    gpio_debounce_ms: 50
-    gpio_noise_delay_ms: 500
+    gpio_debounce_ms: 500
+    gpio_noise_delay_ms: 1000
     gpio_standby_low_seconds: 30
 
   - id: meter_id4
@@ -37,8 +37,8 @@ meters:
     parity: N
     stopbits: 1
     gpio_pin: 27
-    gpio_debounce_ms: 50
-    gpio_noise_delay_ms: 500
+    gpio_debounce_ms: 500
+    gpio_noise_delay_ms: 1000
     gpio_standby_low_seconds: 30
 
   - id: utils_id5
@@ -50,7 +50,7 @@ meters:
     parity: N
     stopbits: 1
 
-  - id: utils_id5
+  - id: utils_id6
     label: "Panel Utilitas 6"
     type: utils
     port: /dev/ttyACM5

@@ -714,8 +714,8 @@
       "source_location": "L83",
       "_origin": "ast",
       "id": "energy_collector_core_gpio_handler_gpiohandler_init",
-      "community": 1,
-      "community_name": "MeterConfig",
+      "community": 0,
+      "community_name": "GPIOHandler",
       "norm_label": ".__init__()"
     },
     {
@@ -725,8 +725,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "cycleopenhook",
-      "community": 1,
-      "community_name": "MeterConfig",
+      "community": 0,
+      "community_name": "GPIOHandler",
       "norm_label": "cycleopenhook"
     },
     {
@@ -736,8 +736,8 @@
       "source_location": "",
       "_origin": "ast",
       "id": "cycleclosehook",
-      "community": 1,
-      "community_name": "MeterConfig",
+      "community": 0,
+      "community_name": "GPIOHandler",
       "norm_label": "cycleclosehook"
     },
     {
@@ -1407,8 +1407,8 @@
       "source_location": "L37",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "modbuspoller"
     },
     {
@@ -1418,8 +1418,8 @@
       "source_location": "L40",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_init",
-      "community": 1,
-      "community_name": "MeterConfig",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": ".__init__()"
     },
     {
@@ -1429,8 +1429,8 @@
       "source_location": "L77",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_stop",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": ".stop()"
     },
     {
@@ -1440,8 +1440,8 @@
       "source_location": "L80",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_run",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": ".run()"
     },
     {
@@ -1451,8 +1451,8 @@
       "source_location": "L110",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_gpio_context",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._gpio_context()"
     },
     {
@@ -1462,8 +1462,8 @@
       "source_location": "L117",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_running_seconds",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._running_seconds()"
     },
     {
@@ -1473,8 +1473,8 @@
       "source_location": "L122",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_poll_once",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._poll_once()"
     },
     {
@@ -1484,8 +1484,8 @@
       "source_location": "L159",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_maybe_persist_history",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._maybe_persist_history()"
     },
     {
@@ -1495,8 +1495,8 @@
       "source_location": "L184",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_read_device_info",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._read_device_info()"
     },
     {
@@ -1506,8 +1506,8 @@
       "source_location": "L210",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_ensure_connected",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._ensure_connected()"
     },
     {
@@ -1517,8 +1517,8 @@
       "source_location": "L226",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_modbuspoller_reconnect",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._reconnect()"
     },
     {
@@ -1539,8 +1539,8 @@
       "source_location": "L38",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_rationale_38",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "satu poller per meter."
     },
     {
@@ -1550,8 +1550,8 @@
       "source_location": "L81",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_rationale_81",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "entry point asyncio task."
     },
     {
@@ -1561,8 +1561,8 @@
       "source_location": "L111",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_rationale_111",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "(gpio_state, session_id, cycle_id). session selalu dari lifetime app."
     },
     {
@@ -1572,8 +1572,8 @@
       "source_location": "L160",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_rationale_160",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "insert 1 snapshot ke db tiap interval (dengan session, tanpa cycle)."
     },
     {
@@ -1583,8 +1583,8 @@
       "source_location": "L185",
       "_origin": "ast",
       "id": "energy_collector_core_modbus_client_rationale_185",
-      "community": 2,
-      "community_name": "MeterReading",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "baca register device_info sekali (best-effort)."
     },
     {
@@ -1605,8 +1605,8 @@
       "source_location": "L26",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_serialize_reading",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": "_serialize_reading()"
     },
     {
@@ -1616,8 +1616,8 @@
       "source_location": "L55",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_redispublisher",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": "redispublisher"
     },
     {
@@ -1627,8 +1627,8 @@
       "source_location": "L58",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_redispublisher_init",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": ".__init__()"
     },
     {
@@ -1638,8 +1638,8 @@
       "source_location": "L73",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_redispublisher_key",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": "._key()"
     },
     {
@@ -1649,8 +1649,8 @@
       "source_location": "L76",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_redispublisher_connect",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": ".connect()"
     },
     {
@@ -1660,8 +1660,8 @@
       "source_location": "L93",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_redispublisher_close",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": ".close()"
     },
     {
@@ -1671,8 +1671,8 @@
       "source_location": "L100",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_redispublisher_ready",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": ".ready()"
     },
     {
@@ -1682,8 +1682,8 @@
       "source_location": "L103",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_redispublisher_publish_reading",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": ".publish_reading()"
     },
     {
@@ -1693,8 +1693,8 @@
       "source_location": "L130",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_redispublisher_publish_device_info",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": ".publish_device_info()"
     },
     {
@@ -1715,8 +1715,8 @@
       "source_location": "L56",
       "_origin": "ast",
       "id": "energy_collector_core_redis_publisher_rationale_56",
-      "community": 5,
-      "community_name": "Application",
+      "community": 2,
+      "community_name": "MeterReading",
       "norm_label": "async redis client untuk mirror ring buffer & device info."
     },
     {
@@ -1726,8 +1726,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "energy_collector_core_register_parser",
-      "community": 6,
-      "community_name": "register_parser.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "register_parser.py"
     },
     {
@@ -1737,8 +1737,8 @@
       "source_location": "L25",
       "_origin": "ast",
       "id": "energy_collector_core_register_parser_words_to_bytes",
-      "community": 6,
-      "community_name": "register_parser.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "_words_to_bytes()"
     },
     {
@@ -1748,8 +1748,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "energy_collector_core_register_parser_decode_register",
-      "community": 6,
-      "community_name": "register_parser.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "decode_register()"
     },
     {
@@ -1759,8 +1759,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "energy_collector_core_register_parser_registerparser",
-      "community": 1,
-      "community_name": "MeterConfig",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "registerparser"
     },
     {
@@ -1781,8 +1781,8 @@
       "source_location": "L74",
       "_origin": "ast",
       "id": "energy_collector_core_register_parser_registerparser_parse_block",
-      "community": 6,
-      "community_name": "register_parser.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": ".parse_block()"
     },
     {
@@ -1792,8 +1792,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "energy_collector_core_register_parser_rationale_1",
-      "community": 6,
-      "community_name": "register_parser.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "decode raw modbus register (list 16-bit words) menjadi nilai numerik.  versi-ind"
     },
     {
@@ -1803,8 +1803,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "energy_collector_core_register_parser_rationale_34",
-      "community": 6,
-      "community_name": "register_parser.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "decode satu nilai dari list word mentah. return none kalau gagal."
     },
     {
@@ -1814,8 +1814,8 @@
       "source_location": "L65",
       "_origin": "ast",
       "id": "energy_collector_core_register_parser_rationale_65",
-      "community": 1,
-      "community_name": "MeterConfig",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "decode blok response modbus berdasarkan register map.      sebuah \"blok\" adalah"
     },
     {
@@ -1825,39 +1825,9 @@
       "source_location": "L75",
       "_origin": "ast",
       "id": "energy_collector_core_register_parser_rationale_75",
-      "community": 6,
-      "community_name": "register_parser.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "ekstrak semua register yang alamatnya jatuh di dalam blok ini."
-    },
-    {
-      "label": "install-service.sh",
-      "file_type": "code",
-      "source_file": "energy-collector/deploy/install-service.sh",
-      "source_location": "L1",
-      "metadata": {
-        "language": "bash",
-        "kind": "file"
-      },
-      "_origin": "ast",
-      "id": "energy_collector_deploy_install_service",
-      "community": 7,
-      "community_name": "ModbusPoller",
-      "norm_label": "install-service.sh"
-    },
-    {
-      "label": "install-service.sh script",
-      "file_type": "code",
-      "source_file": "energy-collector/deploy/install-service.sh",
-      "source_location": "L1",
-      "metadata": {
-        "language": "bash",
-        "kind": "bash_entrypoint"
-      },
-      "_origin": "ast",
-      "id": "energy_collector_deploy_install_service_sh__entry",
-      "community": 7,
-      "community_name": "ModbusPoller",
-      "norm_label": "install-service.sh script"
     },
     {
       "label": "main.py",
@@ -1866,8 +1836,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "energy_collector_main",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "main.py"
     },
     {
@@ -1877,8 +1847,8 @@
       "source_location": "L33",
       "_origin": "ast",
       "id": "energy_collector_main_setup_logging",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "setup_logging()"
     },
     {
@@ -1888,8 +1858,8 @@
       "source_location": "L52",
       "_origin": "ast",
       "id": "energy_collector_main_application",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "application"
     },
     {
@@ -1910,8 +1880,8 @@
       "source_location": "L64",
       "_origin": "ast",
       "id": "energy_collector_main_application_schedule",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._schedule()"
     },
     {
@@ -1921,8 +1891,8 @@
       "source_location": "L72",
       "_origin": "ast",
       "id": "energy_collector_main_application_start",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": ".start()"
     },
     {
@@ -1932,8 +1902,8 @@
       "source_location": "L189",
       "_origin": "ast",
       "id": "energy_collector_main_application_cleanup",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._cleanup()"
     },
     {
@@ -1943,8 +1913,8 @@
       "source_location": "L218",
       "_origin": "ast",
       "id": "energy_collector_main_application_request_shutdown",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": ".request_shutdown()"
     },
     {
@@ -1954,8 +1924,8 @@
       "source_location": "L223",
       "_origin": "ast",
       "id": "energy_collector_main_application_db_open_cycle",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._db_open_cycle()"
     },
     {
@@ -1965,8 +1935,8 @@
       "source_location": "L226",
       "_origin": "ast",
       "id": "energy_collector_main_application_db_close_cycle",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 7,
+      "community_name": "ModbusPoller",
       "norm_label": "._db_close_cycle()"
     },
     {
@@ -1976,8 +1946,8 @@
       "source_location": "L230",
       "_origin": "ast",
       "id": "energy_collector_main_amain",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "_amain()"
     },
     {
@@ -1987,8 +1957,8 @@
       "source_location": "L249",
       "_origin": "ast",
       "id": "energy_collector_main_main",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "main()"
     },
     {
@@ -1998,8 +1968,8 @@
       "source_location": "L1",
       "_origin": "ast",
       "id": "energy_collector_main_rationale_1",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "entry point energy meter collection system.  orkestrasi: load config \u2192 init gpio"
     },
     {
@@ -2009,8 +1979,8 @@
       "source_location": "L34",
       "_origin": "ast",
       "id": "energy_collector_main_rationale_34",
-      "community": 4,
-      "community_name": "settings.py",
+      "community": 5,
+      "community_name": "Application",
       "norm_label": "konfigurasi structlog \u2192 output json ke stdout."
     },
     {
@@ -6204,16 +6174,6 @@
     {
       "relation": "contains",
       "confidence": "EXTRACTED",
-      "source_file": "energy-collector/deploy/install-service.sh",
-      "source_location": "L1",
-      "weight": 1.0,
-      "source": "energy_collector_deploy_install_service",
-      "target": "energy_collector_deploy_install_service_sh__entry",
-      "confidence_score": 1.0
-    },
-    {
-      "relation": "contains",
-      "confidence": "EXTRACTED",
       "source_file": "energy-collector/main.py",
       "source_location": "L230",
       "weight": 1.0,
@@ -6933,5 +6893,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "e62990cbb192f858782a3ec2309ce205ee46cd31"
+  "built_at_commit": "1d0853e7fbe6e3d8c9674dae718e33ba09a641fe"
 }

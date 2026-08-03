@@ -1,16 +1,16 @@
-# Graph Report - 05_Collecting Data  (2026-08-03)
+# Graph Report - 05_Collecting Data  (2026-07-27)
 
 ## Corpus Check
-- 19 files · ~11,244 words
+- 18 files · ~11,054 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 235 nodes · 416 edges · 11 communities (10 shown, 1 thin omitted)
+- 233 nodes · 415 edges · 10 communities
 - Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.59)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `e62990cb`
+- Built from commit: `1d0853e7`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -21,7 +21,6 @@
 - Database
 - settings.py
 - Application
-- register_parser.py
 - ModbusPoller
 - Module Detail
 - Storage Schema — Redis & PostgreSQL
@@ -47,41 +46,41 @@
   energy-collector/core/modbus_client.py → energy-collector/config/settings.py
 - `ModbusPoller` --uses--> `RegisterDef`  [INFERRED]
   energy-collector/core/modbus_client.py → energy-collector/config/settings.py
-- `Application` --uses--> `RingBuffer`  [INFERRED]
-  energy-collector/main.py → energy-collector/core/buffer.py
+- `RegisterParser` --uses--> `RegisterDef`  [INFERRED]
+  energy-collector/core/register_parser.py → energy-collector/config/settings.py
 
 ## Import Cycles
 - None detected.
 
-## Communities (11 total, 1 thin omitted)
+## Communities (10 total, 0 thin omitted)
 
 ### Community 0 - "GPIOHandler"
-Cohesion: 0.10
-Nodes (15): cleanup_gpio(), _gpio_setup_hints(), GPIOHandler, init_gpio(), _new_id(), _now(), datetime, State machine cycle per pin GPIO (per meter).  Optocoupler open-collector: pin d (+7 more)
+Cohesion: 0.09
+Nodes (17): CycleCloseHook, CycleOpenHook, cleanup_gpio(), _gpio_setup_hints(), GPIOHandler, init_gpio(), _new_id(), _now() (+9 more)
 
 ### Community 1 - "MeterConfig"
-Cohesion: 0.07
-Nodes (24): ABC, BaseModel, CycleCloseHook, CycleOpenHook, MeterConfig, Definisi satu register dari `registers.yaml`., Konfigurasi satu meter dari `meters.yaml`.      `type` / `device_type`:       -, RegisterDef (+16 more)
+Cohesion: 0.08
+Nodes (20): ABC, BaseModel, MeterConfig, Definisi satu register dari `registers.yaml`., Konfigurasi satu meter dari `meters.yaml`.      `type` / `device_type`:       -, RegisterDef, Hardware abstraction layer — Modbus backend (asli / mock)., create_modbus_backend() (+12 more)
 
 ### Community 2 - "MeterReading"
 Cohesion: 0.10
-Nodes (13): Buffer FIFO thread-safe berbasis `deque(maxlen=...)`.      Sample tertua otomati, Salinan isi buffer (tidak mengosongkan buffer)., RingBuffer, ModbusPoller, (gpio_state, session_id, cycle_id). Session selalu dari lifetime app., Insert 1 snapshot ke DB tiap interval (dengan session, tanpa cycle)., Baca register device_info sekali (best-effort)., Satu poller per meter. (+5 more)
+Nodes (10): Buffer FIFO thread-safe berbasis `deque(maxlen=...)`.      Sample tertua otomati, Salinan isi buffer (tidak mengosongkan buffer)., RingBuffer, Async Redis client untuk mirror ring buffer & device info., RedisPublisher, _serialize_reading(), MeterReading, Satu sample pembacaan dari satu meter.      Live (buffer/Redis): session_id life (+2 more)
 
 ### Community 3 - "Database"
 Cohesion: 0.20
 Nodes (6): _as_uuid(), Database, datetime, Lapisan PostgreSQL via asyncpg.  - Insert per sample (real-time, bukan batch) sa, Wrapper connection pool asyncpg., UUID
 
 ### Community 4 - "settings.py"
-Cohesion: 0.11
-Nodes (18): BaseSettings, _assert_unique(), get_settings(), load_meters(), load_registers(), Konfigurasi global aplikasi.  Parameter dibaca dari environment / file `.env` vi, Muat daftar meter dari YAML. Raise kalau file/format invalid., Muat register map dari YAML. Raise kalau file/format invalid. (+10 more)
+Cohesion: 0.18
+Nodes (12): BaseSettings, _assert_unique(), get_settings(), load_meters(), load_registers(), Konfigurasi global aplikasi.  Parameter dibaca dari environment / file `.env` vi, Muat daftar meter dari YAML. Raise kalau file/format invalid., Muat register map dari YAML. Raise kalau file/format invalid. (+4 more)
 
 ### Community 5 - "Application"
-Cohesion: 0.15
-Nodes (7): Ring buffer per meter untuk konsumsi frontend (live view).  Selalu menerima samp, Polling loop Modbus per meter (asyncio task).  Tiap cycle (default 500ms): baca, Publish sample buffer & device info ke Redis untuk konsumsi service API terpisah, Async Redis client untuk mirror ring buffer & device info., RedisPublisher, _serialize_reading(), Payload satu sample pembacaan meter.
+Cohesion: 0.13
+Nodes (14): Ring buffer per meter untuk konsumsi frontend (live view).  Selalu menerima samp, Polling loop Modbus per meter (asyncio task).  Tiap cycle (default 500ms): baca, Publish sample buffer & device info ke Redis untuk konsumsi service API terpisah, decode_register(), Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind, Decode satu nilai dari list word mentah. Return None kalau gagal., Ekstrak semua register yang alamatnya jatuh di dalam blok ini., _words_to_bytes() (+6 more)
 
-### Community 6 - "register_parser.py"
-Cohesion: 0.33
-Nodes (5): decode_register(), Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind, Decode satu nilai dari list word mentah. Return None kalau gagal., Ekstrak semua register yang alamatnya jatuh di dalam blok ini., _words_to_bytes()
+### Community 7 - "ModbusPoller"
+Cohesion: 0.14
+Nodes (9): ModbusPoller, (gpio_state, session_id, cycle_id). Session selalu dari lifetime app., Insert 1 snapshot ke DB tiap interval (dengan session, tanpa cycle)., Baca register device_info sekali (best-effort)., Satu poller per meter., Entry point asyncio task., Decode blok response Modbus berdasarkan register map.      Sebuah "blok" adalah, RegisterParser (+1 more)
 
 ### Community 9 - "Module Detail"
 Cohesion: 0.07
@@ -92,19 +91,18 @@ Cohesion: 0.13
 Nodes (14): 0. Tipe Device (`device_type`), 1.1 Pola Key, 1.2 `latest` (String) & `readings` (List), 1.3 `device_info` (Hash), 1.4 Contoh Akses (untuk Endpoint), 1. Redis, 2.1 Tabel `meter_readings`, 2.2 Tabel `production_sessions` (+6 more)
 
 ## Knowledge Gaps
-- **35 isolated node(s):** `install-service.sh script`, `0. Tipe Device (`device_type`)`, `1.1 Pola Key`, `1.2 `latest` (String) & `readings` (List)`, `1.3 `device_info` (Hash)` (+30 more)
+- **34 isolated node(s):** `0. Tipe Device (`device_type`)`, `1.1 Pola Key`, `1.2 `latest` (String) & `readings` (List)`, `1.3 `device_info` (Hash)`, `1.4 Contoh Akses (untuk Endpoint)` (+29 more)
   These have ≤1 connection - possible missing edges or undocumented components.
-- **1 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ModbusPoller` connect `MeterReading` to `GPIOHandler`, `MeterConfig`, `settings.py`, `Application`?**
-  _High betweenness centrality (0.184) - this node is a cross-community bridge._
-- **Why does `GPIOHandler` connect `GPIOHandler` to `MeterConfig`, `MeterReading`, `settings.py`, `Application`?**
-  _High betweenness centrality (0.169) - this node is a cross-community bridge._
-- **Why does `MeterConfig` connect `MeterConfig` to `GPIOHandler`, `MeterReading`, `settings.py`?**
-  _High betweenness centrality (0.103) - this node is a cross-community bridge._
+- **Why does `ModbusPoller` connect `ModbusPoller` to `GPIOHandler`, `MeterConfig`, `MeterReading`, `Application`?**
+  _High betweenness centrality (0.187) - this node is a cross-community bridge._
+- **Why does `GPIOHandler` connect `GPIOHandler` to `MeterConfig`, `Application`, `ModbusPoller`?**
+  _High betweenness centrality (0.172) - this node is a cross-community bridge._
+- **Why does `MeterConfig` connect `MeterConfig` to `GPIOHandler`, `settings.py`, `ModbusPoller`?**
+  _High betweenness centrality (0.105) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `GPIOHandler` (e.g. with `MeterConfig` and `ModbusPoller`) actually correct?**
   _`GPIOHandler` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 12 inferred relationships involving `ModbusPoller` (e.g. with `MeterConfig` and `RegisterDef`) actually correct?**

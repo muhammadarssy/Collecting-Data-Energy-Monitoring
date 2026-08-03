@@ -1,0 +1,28 @@
+[Unit]
+Description=Energy Meter Data Collector
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+# Akses GPIO di Raspberry Pi
+SupplementaryGroups=gpio
+
+WorkingDirectory=/opt/energy-collector
+EnvironmentFile=-/opt/energy-collector/.env
+ExecStart=/opt/energy-collector/.venv/bin/python main.py
+
+# Restart otomatis kalau crash; SIGTERM dari systemd ditangani di main.py
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=30
+
+# Log ke journald: journalctl -u energy-collector -f
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=energy-collector
+
+[Install]
+WantedBy=multi-user.target
