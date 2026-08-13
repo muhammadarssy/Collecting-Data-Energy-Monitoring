@@ -2,38 +2,12 @@ meters:
   # Energy: history DB tiap interval (session lifetime, tanpa cycle_id di reading).
   # GPIO cycle: LOW pertama buka cycle; HIGH singkat = noise (digabung);
   # HIGH >= gpio_noise_delay_ms tutup 1 cycle; LOW >= gpio_standby_low_seconds = mati → reset standby.
-  # - id: meter_01
-  #   label: "Mesin Injeksi 1"
-  #   type: energy
-  #   port: /dev/ttyACM1
-  #   baudrate: 9600
-  #   slave_id: 2
-  #   parity: N
-  #   stopbits: 1
-  #   gpio_pin: 3
-  #   gpio_debounce_ms: 50
-  #   gpio_noise_delay_ms: 500
-  #   gpio_standby_low_seconds: 30
-
-  - id: meter_id3
-    label: "Mesin Injeksi 3"
+  - id: meter_id1
+    label: "Mesin Injeksi 1"
     type: energy
-    port: /dev/ttyACM2
+    port: /dev/ttyACM4
     baudrate: 9600
-    slave_id: 3
-    parity: N
-    stopbits: 1
-    gpio_pin: 17
-    gpio_debounce_ms: 500
-    gpio_noise_delay_ms: 1000
-    gpio_standby_low_seconds: 30
-
-  - id: meter_id4
-    label: "Mesin Injeksi 4"
-    type: energy
-    port: /dev/ttyACM3
-    baudrate: 9600
-    slave_id: 4
+    slave_id: 1
     parity: N
     stopbits: 1
     gpio_pin: 27
@@ -41,10 +15,49 @@ meters:
     gpio_noise_delay_ms: 1000
     gpio_standby_low_seconds: 30
 
+  # - id: meter_id2
+  #   label: "Mesin Injeksi 2"
+  #   type: energy
+  #   port: /dev/ttyACM2
+  #   baudrate: 9600
+  #   slave_id: 2
+  #   parity: N
+  #   stopbits: 1
+  #   gpio_pin: 22
+  #   gpio_debounce_ms: 500
+  #   gpio_noise_delay_ms: 1000
+  #   gpio_standby_low_seconds: 30
+
+  - id: meter_id3
+    label: "Mesin Injeksi 3"
+    type: energy
+    port: /dev/ttyACM6
+    baudrate: 9600
+    slave_id: 3
+    parity: N
+    stopbits: 1
+    gpio_pin: 23
+    gpio_debounce_ms: 500
+    gpio_noise_delay_ms: 1000
+    gpio_standby_low_seconds: 30
+
+  - id: meter_id4
+    label: "Mesin Injeksi 4"
+    type: energy
+    port: /dev/ttyACM7
+    baudrate: 9600
+    slave_id: 4
+    parity: N
+    stopbits: 1
+    gpio_pin: 24
+    gpio_debounce_ms: 500
+    gpio_noise_delay_ms: 1000
+    gpio_standby_low_seconds: 30
+
   - id: utils_id5
     label: "Panel Utilitas 5"
     type: utils
-    port: /dev/ttyACM4
+    port: /dev/ttyACM0
     baudrate: 9600
     slave_id: 5
     parity: N
@@ -53,7 +66,7 @@ meters:
   - id: utils_id6
     label: "Panel Utilitas 6"
     type: utils
-    port: /dev/ttyACM5
+    port: /dev/ttyACM1
     baudrate: 9600
     slave_id: 6
     parity: N

@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "energy-collector/config/meters.yaml": {
-    "mtime": 1786517673.8801198,
-    "ast_hash": "819651571903aed12c6e69fbd4970891",
+    "mtime": 1786499111.8578844,
+    "ast_hash": "33f630995806707fd4ee52a6b65a44c3",
     "semantic_hash": ""
   },
   "energy-collector/config/registers.yaml": {
@@ -107,11 +107,6 @@
   "energy-collector/deploy/install-service.sh": {
     "mtime": 1785739461.7483172,
     "ast_hash": "6a1a56d80472ad0181ee5664360b4ce7",
-    "semantic_hash": ""
-  },
-  "read_reader.py": {
-    "mtime": 1786518434.008437,
-    "ast_hash": "85b8ebcb04dc43a5501edf94987de548",
     "semantic_hash": ""
   }
 }

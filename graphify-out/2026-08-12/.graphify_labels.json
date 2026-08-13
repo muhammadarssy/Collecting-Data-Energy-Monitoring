@@ -4,7 +4,6 @@
   "2": "MeterReading",
   "3": "Database",
   "4": "settings.py",
-  "5": "RedisPublisher",
   "6": "register_parser.py",
   "7": "ModbusPoller",
   "8": "gpio_reader.py",

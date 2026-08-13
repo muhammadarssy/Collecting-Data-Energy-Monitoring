@@ -17,7 +17,7 @@ from config.settings import MeterConfig, RegisterDef
 from core.buffer import RingBuffer
 from core.gpio_handler import GPIOHandler, State
 from core.hardware.modbus_backend import ModbusBackend, ModbusReadError
-from core.register_parser import RegisterParser
+from core.register_parser import RegisterParser, apply_meter_conversion
 from core.redis_publisher import RedisPublisher
 from models.meter_reading import MeterReading
 
@@ -129,6 +129,11 @@ class ModbusPoller:
 
         values = self.parser.parse_block(BLOCK1_BASE, block1)
         values.update(self.parser.parse_block(BLOCK2_BASE, block2))
+        values = apply_meter_conversion(
+            values,
+            self.device_info.get("UrAt"),
+            self.device_info.get("IrAt"),
+        )
 
         gpio_state, session_id, cycle_id = self._gpio_context()
         reading = MeterReading(

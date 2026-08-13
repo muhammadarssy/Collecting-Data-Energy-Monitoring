@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>05_Collecting Data — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 235 nodes, 416 edges, 11 communities. Commit: e62990c</p>
+<p class="subtitle">Generated from graphify knowledge graph: 240 nodes, 422 edges, 12 communities. Commit: 634c575</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -71,6 +71,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <a href="#tests-fixtures">Tests &amp; Fixtures</a>
     <a href="#module-detail">Module Detail</a>
     <a href="#database">Database</a>
+    <a href="#application">Application</a>
     <a href="#gpio-reader-py">gpio_reader.py</a>
 </div>
 
@@ -81,7 +82,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>7 nodes</small>")
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>9 nodes</small>")
     class EXTRACT_PIPELINE_5F350230 module;
     BUILD_GRAPH_321CBB04("Graph Build<br/><small>15 nodes</small>")
     class BUILD_GRAPH_321CBB04 module;
@@ -95,6 +96,8 @@ flowchart LR
     class MODULE_DETAIL_2F521CF1 module;
     DATABASE_6D613A1E("Database<br/><small>18 nodes</small>")
     class DATABASE_6D613A1E module;
+    APPLICATION_D2005CC2("Application<br/><small>3 nodes</small>")
+    class APPLICATION_D2005CC2 module;
     GPIO_READER_PY_97DD5E21("gpio_reader.py<br/><small>1 nodes</small>")
     class GPIO_READER_PY_97DD5E21 module;
     CLI_SKILLS_9964CBB8 -->|imports x6| TESTS_FIXTURES_B84B1DCC
@@ -125,7 +128,7 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>7</td><td><code>6</code></td></tr><tr><td>Graph Build</td><td>15</td><td><code>10</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>32</td><td><code>4, 7</code></td></tr><tr><td>Serving API</td><td>36</td><td><code>0</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>99</td><td><code>1, 2, 5</code></td></tr><tr><td>Module Detail</td><td>27</td><td><code>9</code></td></tr><tr><td>Database</td><td>18</td><td><code>3</code></td></tr><tr><td>gpio_reader.py</td><td>1</td><td><code>8</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>9</td><td><code>6</code></td></tr><tr><td>Graph Build</td><td>15</td><td><code>10</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>32</td><td><code>4, 7</code></td></tr><tr><td>Serving API</td><td>36</td><td><code>0</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>99</td><td><code>1, 2, 5</code></td></tr><tr><td>Module Detail</td><td>27</td><td><code>9</code></td></tr><tr><td>Database</td><td>18</td><td><code>3</code></td></tr><tr><td>Application</td><td>3</td><td><code>11</code></td></tr><tr><td>gpio_reader.py</td><td>1</td><td><code>8</code></td></tr>
     </table>
   </div>
   <div class="card">
@@ -137,8 +140,8 @@ flowchart LR
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>235 nodes · 416 edges · 11 communities (10 shown, 1 thin omitted)</li>
-      <li>Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 44 edges (avg confidence: 0.59)</li>
+      <li>240 nodes · 422 edges · 12 communities (10 shown, 2 thin omitted)</li>
+      <li>Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 45 edges (avg confidence: 0.59)</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `GPIOHandler` - 29 edges</li>
       <li>2. `ModbusPoller` - 25 edges</li>
@@ -149,28 +152,32 @@ flowchart LR
 <hr>
 <!-- ====== 2. Extraction Pipeline ====== -->
 <h2 id="extract-pipeline">2. Extraction Pipeline</h2>
-<p>Extraction Pipeline groups implementation around register, parserpy, energy, collector, mostly in energy-collector/core/register_parser.py. This section covers 7 nodes and 7 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Extraction Pipeline groups implementation around register, parserpy, energy, collector, mostly in energy-collector/core/register_parser.py. This section covers 9 nodes and 9 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Extraction Pipeline (7 nodes, 7 edges)
+    %% Section: Extraction Pipeline (9 nodes, 9 edges)
     energy_collector_core_register_parser_words_to_b_d9895a4d("_words_to_bytes()<br/><small>energy-collector/core/register_parser.py</small>")
     energy_collector_core_register_parser_decode_reg_76879259("decode_register()<br/><small>energy-collector/core/register_parser.py</small>")
     energy_collector_core_register_parser_registerpa_44886fd9("parse_block()<br/><small>energy-collector/core/register_parser.py</small>")
+    energy_collector_core_register_parser_apply_mete_31d2a751("apply_meter_conversion()<br/><small>energy-collector/core/register_parser.py</small>")
     energy_collector_core_register_parser_d8f33746("register_parser.py")
     energy_collector_core_register_parser_rationale_d243b870("Decode raw Modbus register (list 16-bit...<br/><small>energy-collector/core/register_parser.py</small>")
     energy_collector_core_register_parser_rationale_051da7ca("Decode satu nilai dari list word mentah...<br/><small>energy-collector/core/register_parser.py</small>")
-    energy_collector_core_register_parser_rationale_fee23591("Ekstrak semua register yang alamatnya j...<br/><small>energy-collector/core/register_parser.py</small>")
+    energy_collector_core_register_parser_rationale_4083bd2c("Ekstrak semua register yang alamatnya j...<br/><small>energy-collector/core/register_parser.py</small>")
+    energy_collector_core_register_parser_rationale_21746303("Konversi raw → engineering sesuai rumus...<br/><small>energy-collector/core/register_parser.py</small>")
     energy_collector_core_register_parser_words_to_b_d9895a4d -->|calls| energy_collector_core_register_parser_decode_reg_76879259
     energy_collector_core_register_parser_decode_reg_76879259 -->|calls| energy_collector_core_register_parser_registerpa_44886fd9
     class energy_collector_core_register_parser_words_to_b_d9895a4d function;
     class energy_collector_core_register_parser_decode_reg_76879259 function;
     class energy_collector_core_register_parser_registerpa_44886fd9 function;
+    class energy_collector_core_register_parser_apply_mete_31d2a751 function;
     class energy_collector_core_register_parser_d8f33746 module;
     class energy_collector_core_register_parser_rationale_d243b870 concept;
     class energy_collector_core_register_parser_rationale_051da7ca concept;
-    class energy_collector_core_register_parser_rationale_fee23591 concept;
+    class energy_collector_core_register_parser_rationale_4083bd2c concept;
+    class energy_collector_core_register_parser_rationale_21746303 concept;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -218,6 +225,14 @@ flowchart LR
 </tr>
 <tr>
   <td>4</td>
+  <td><code>apply_meter_conversion()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>apply_meter_conversion() node in energy-collector/core/register_parser.py.</td>
+</tr>
+<tr>
+  <td>5</td>
   <td><code>.parse_block()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>decode_register()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
@@ -225,7 +240,7 @@ flowchart LR
   <td>.parse_block() node in energy-collector/core/register_parser.py.</td>
 </tr>
 <tr>
-  <td>5</td>
+  <td>6</td>
   <td><code>Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -233,7 +248,7 @@ flowchart LR
   <td>Design note for Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind.</td>
 </tr>
 <tr>
-  <td>6</td>
+  <td>7</td>
   <td><code>Decode satu nilai dari list word mentah. Return None kalau gagal.</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -241,7 +256,15 @@ flowchart LR
   <td>Design note for Decode satu nilai dari list word mentah. Return None kalau gagal..</td>
 </tr>
 <tr>
-  <td>7</td>
+  <td>8</td>
+  <td><code>Konversi raw → engineering sesuai rumus UrAt/IrAt.      U  = URMS × (UrAt×0.1)×0</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Konversi raw → engineering sesuai rumus UrAt/IrAt.      U  = URMS × (UrAt×0.1)×0.</td>
+</tr>
+<tr>
+  <td>9</td>
   <td><code>Ekstrak semua register yang alamatnya jatuh di dalam blok ini.</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -255,12 +278,12 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>energy-collector/core/register_parser.py</code></td><td>7 nodes</td></tr>
+      <tr><td><code>energy-collector/core/register_parser.py</code></td><td>9 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: explains x3, contains x2, calls x2. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: explains x4, contains x3, calls x2. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -2087,8 +2110,85 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 9. gpio_reader.py ====== -->
-<h2 id="gpio-reader-py">9. gpio_reader.py</h2>
+<!-- ====== 9. Application ====== -->
+<h2 id="application">9. Application</h2>
+<p>Application groups implementation around read, readerpy, poll, target, mostly in read_reader.py. This section covers 3 nodes and 3 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Application (3 nodes, 3 edges)
+    read_reader_poll_target_b6c6d2e5("poll_target()<br/><small>read_reader.py</small>")
+    read_reader_main_d364163c("main()<br/><small>read_reader.py</small>")
+    read_reader_4fd06ca9("read_reader.py")
+    read_reader_poll_target_b6c6d2e5 -->|calls| read_reader_main_d364163c
+    class read_reader_poll_target_b6c6d2e5 function;
+    class read_reader_main_d364163c function;
+    class read_reader_4fd06ca9 module;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>read_reader.py</code><br><small style="color:var(--muted)">read_reader.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in read_reader.py.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>poll_target()</code><br><small style="color:var(--muted)">read_reader.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">read_reader.py</small></td>
+  <td>poll_target() node in read_reader.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>main()</code><br><small style="color:var(--muted)">read_reader.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>poll_target()</code><br><small style="color:var(--muted)">read_reader.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>main() node in read_reader.py.</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>read_reader.py</code></td><td>3 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: contains x2, calls x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 10. gpio_reader.py ====== -->
+<h2 id="gpio-reader-py">10. gpio_reader.py</h2>
 <p>gpio_reader.py groups implementation around gpio, readerpy, mostly in gpio_reader.py. This section covers 1 nodes and 0 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -2149,18 +2249,18 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>235</td></tr>
-      <tr><td>Edges</td><td>416</td></tr>
+      <tr><td>Nodes</td><td>240</td></tr>
+      <tr><td>Edges</td><td>422</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>11</td></tr>
-      <tr><td>Documented Sections</td><td>8</td></tr>
+      <tr><td>Communities</td><td>12</td></tr>
+      <tr><td>Documented Sections</td><td>9</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>372</td></tr>
-      <tr><td>INFERRED</td><td>44</td></tr>
+      <tr><td>EXTRACTED</td><td>377</td></tr>
+      <tr><td>INFERRED</td><td>45</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
   </div>
@@ -2168,7 +2268,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>05_Collecting Data — Architecture Documentation</p>
-  <p>Generated: 2026-08-03 06:44 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-08-12 07:07 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

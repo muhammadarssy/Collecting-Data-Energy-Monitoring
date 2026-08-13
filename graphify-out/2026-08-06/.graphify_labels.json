@@ -4,11 +4,10 @@
   "2": "MeterReading",
   "3": "Database",
   "4": "settings.py",
-  "5": "RedisPublisher",
+  "5": "Application",
   "6": "register_parser.py",
   "7": "ModbusPoller",
   "8": "gpio_reader.py",
   "9": "Module Detail",
-  "10": "Storage Schema — Redis & PostgreSQL",
-  "11": "Application"
+  "10": "Storage Schema — Redis & PostgreSQL"
 }

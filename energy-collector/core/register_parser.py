@@ -61,6 +61,52 @@ def decode_register(words: list[int], reg: RegisterDef) -> Optional[float]:
         return None
 
 
+# Rumus CT/PT (manual meter): nilai mentah × faktor → unit engineering.
+_VOLTAGE = ("Ua", "Ub", "Uc", "Uab", "Ubc", "Uca")
+_CURRENT = ("Ia", "Ib", "Ic")
+_ACTIVE_P = ("Pt", "Pa", "Pb", "Pc")
+_REACTIVE_Q = ("Qt", "Qa", "Qb", "Qc")
+_PF = ("PFt", "PFa", "PFb", "PFc")
+_ENERGY = ("ImpEp", "ExpEp", "Q1Eq", "Q2Eq", "Q3Eq", "Q4Eq")
+
+
+def apply_meter_conversion(
+    values: dict[str, Optional[float]],
+    urat: Optional[float],
+    irat: Optional[float],
+) -> dict[str, Optional[float]]:
+    """Konversi raw → engineering sesuai rumus UrAt/IrAt.
+
+    U  = URMS × (UrAt×0.1)×0.1
+    I  = IRMS × IrAt×0.001
+    P/Q = P×(UrAt×0.1)×IrAt×0.1
+    PF = PF×0.001
+    F  = Freq×0.01
+    Ep = E×UrAt×IrAt
+    """
+    out = dict(values)
+
+    def _mul(keys: tuple[str, ...], factor: float) -> None:
+        for k in keys:
+            v = out.get(k)
+            if v is not None:
+                out[k] = v * factor
+
+    _mul(_PF, 0.001)
+    if out.get("frequency") is not None:
+        out["frequency"] = out["frequency"] * 0.01
+
+    if urat is None or irat is None or urat == 0 or irat == 0:
+        return out
+
+    _mul(_VOLTAGE, (urat * 0.1) * 0.1)
+    _mul(_CURRENT, irat * 0.001)
+    _mul(_ACTIVE_P, (urat * 0.1) * irat * 0.1)
+    _mul(_REACTIVE_Q, (urat * 0.1) * irat * 0.1)
+    _mul(_ENERGY, urat * irat)
+    return out
+
+
 class RegisterParser:
     """Decode blok response Modbus berdasarkan register map.
 

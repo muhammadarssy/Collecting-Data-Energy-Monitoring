@@ -5,7 +5,7 @@
     "semantic_hash": "d10a451beab1a24a71a6c25c75631f07"
   },
   "energy-collector/config/settings.py": {
-    "mtime": 1785980637.960882,
+    "mtime": 1785124523.8661463,
     "ast_hash": "4c2fb3a0b48544e0af95512e3de48cc0",
     "semantic_hash": ""
   },
@@ -35,13 +35,13 @@
     "semantic_hash": "0e4f63077a990c1d6430612a766547bf"
   },
   "energy-collector/core/hardware/modbus_backend.py": {
-    "mtime": 1786502296.0566578,
-    "ast_hash": "2336c28743b49156e581266493225bd3",
-    "semantic_hash": ""
+    "mtime": 1782268418.7272599,
+    "ast_hash": "8c5a0c6437cde73637dc8b77d818d855",
+    "semantic_hash": "8c5a0c6437cde73637dc8b77d818d855"
   },
   "energy-collector/core/modbus_client.py": {
-    "mtime": 1786502285.5490901,
-    "ast_hash": "1be6f090d54c2a82606d46561a43bc9a",
+    "mtime": 1785120869.1478004,
+    "ast_hash": "3e067203cffaad05abf7bc9d29a570d1",
     "semantic_hash": ""
   },
   "energy-collector/core/redis_publisher.py": {
@@ -50,12 +50,12 @@
     "semantic_hash": ""
   },
   "energy-collector/core/register_parser.py": {
-    "mtime": 1786502282.14997,
-    "ast_hash": "49f41a16e3d7d77ed8192414779faf75",
-    "semantic_hash": ""
+    "mtime": 1782268323.2454996,
+    "ast_hash": "7f74d4c4ee7c30a5560c4ad7c730f117",
+    "semantic_hash": "7f74d4c4ee7c30a5560c4ad7c730f117"
   },
   "energy-collector/main.py": {
-    "mtime": 1785980638.004168,
+    "mtime": 1785124527.841087,
     "ast_hash": "00c4588b45fe0280704d158b8c8c2207",
     "semantic_hash": ""
   },
@@ -85,8 +85,8 @@
     "semantic_hash": ""
   },
   "energy-collector/config/meters.yaml": {
-    "mtime": 1786517673.8801198,
-    "ast_hash": "819651571903aed12c6e69fbd4970891",
+    "mtime": 1785739395.5077813,
+    "ast_hash": "46a63f29308b46ee36923133d6a868d5",
     "semantic_hash": ""
   },
   "energy-collector/config/registers.yaml": {
@@ -107,11 +107,6 @@
   "energy-collector/deploy/install-service.sh": {
     "mtime": 1785739461.7483172,
     "ast_hash": "6a1a56d80472ad0181ee5664360b4ce7",
-    "semantic_hash": ""
-  },
-  "read_reader.py": {
-    "mtime": 1786518434.008437,
-    "ast_hash": "85b8ebcb04dc43a5501edf94987de548",
     "semantic_hash": ""
   }
 }
