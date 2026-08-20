@@ -17,10 +17,14 @@ import uuid
 from datetime import datetime, timezone
 from typing import Callable, Optional
 
-import RPi.GPIO as GPIO  # type: ignore
 import structlog
 
 from config.settings import MeterConfig
+
+try:
+    import RPi.GPIO as GPIO  # type: ignore
+except ImportError:  # Windows / mesin tanpa lib GPIO
+    GPIO = None  # type: ignore
 
 log = structlog.get_logger(__name__)
 
@@ -62,11 +66,17 @@ def _gpio_setup_hints(pin: int) -> list[str]:
 
 
 def init_gpio() -> None:
+    if GPIO is None:
+        raise RuntimeError(
+            "RPi.GPIO tidak tersedia. Set ENABLE_GPIO=false di .env untuk mode tanpa GPIO/cycle."
+        )
     GPIO.setmode(GPIO.BCM)
     log.info("gpio_init", mode="BCM")
 
 
 def cleanup_gpio() -> None:
+    if GPIO is None:
+        return
     try:
         GPIO.cleanup()
     except Exception:
@@ -88,6 +98,10 @@ class GPIOHandler:
         on_cycle_close: Optional[CycleCloseHook] = None,
     ) -> None:
         self.meter = meter
+        if GPIO is None:
+            raise RuntimeError(
+                "RPi.GPIO tidak tersedia. Set ENABLE_GPIO=false di .env untuk mode tanpa GPIO/cycle."
+            )
         if meter.gpio_pin is None:
             raise ValueError(f"GPIOHandler butuh gpio_pin untuk meter '{meter.id}'")
         self.pin = meter.gpio_pin

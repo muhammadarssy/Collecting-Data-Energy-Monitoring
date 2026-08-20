@@ -60,7 +60,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 <div class="container">
 
 <h1>05_Collecting Data — Complete Call Flow &amp; Architecture Documentation</h1>
-<p class="subtitle">Generated from graphify knowledge graph: 240 nodes, 422 edges, 12 communities. Commit: 634c575</p>
+<p class="subtitle">Generated from graphify knowledge graph: 242 nodes, 424 edges, 13 communities. Commit: f12af18</p>
 
 <div class="nav">
     <a href="#overview">Architecture Overview</a>
@@ -68,6 +68,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
     <a href="#build-graph">Graph Build</a>
     <a href="#cli-skills">CLI &amp; Skill Installers</a>
     <a href="#serve-api">Serving API</a>
+    <a href="#security-global">Security &amp; Global Graph</a>
     <a href="#tests-fixtures">Tests &amp; Fixtures</a>
     <a href="#module-detail">Module Detail</a>
     <a href="#database">Database</a>
@@ -82,15 +83,17 @@ hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
 
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>9 nodes</small>")
+    EXTRACT_PIPELINE_5F350230("Extraction Pipeline<br/><small>35 nodes</small>")
     class EXTRACT_PIPELINE_5F350230 module;
     BUILD_GRAPH_321CBB04("Graph Build<br/><small>15 nodes</small>")
     class BUILD_GRAPH_321CBB04 module;
-    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>32 nodes</small>")
+    CLI_SKILLS_9964CBB8("CLI &amp; Skill Installers<br/><small>14 nodes</small>")
     class CLI_SKILLS_9964CBB8 module;
     SERVE_API_35EC8E86("Serving API<br/><small>36 nodes</small>")
     class SERVE_API_35EC8E86 module;
-    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>99 nodes</small>")
+    SECURITY_GLOBAL_5B9C6A04("Security &amp; Global Graph<br/><small>18 nodes</small>")
+    class SECURITY_GLOBAL_5B9C6A04 module;
+    TESTS_FIXTURES_B84B1DCC("Tests &amp; Fixtures<br/><small>75 nodes</small>")
     class TESTS_FIXTURES_B84B1DCC module;
     MODULE_DETAIL_2F521CF1("Module Detail<br/><small>27 nodes</small>")
     class MODULE_DETAIL_2F521CF1 module;
@@ -100,18 +103,18 @@ flowchart LR
     class APPLICATION_D2005CC2 module;
     GPIO_READER_PY_97DD5E21("gpio_reader.py<br/><small>1 nodes</small>")
     class GPIO_READER_PY_97DD5E21 module;
-    CLI_SKILLS_9964CBB8 -->|imports x6| TESTS_FIXTURES_B84B1DCC
-    TESTS_FIXTURES_B84B1DCC -->|imports x5| CLI_SKILLS_9964CBB8
-    TESTS_FIXTURES_B84B1DCC -->|references x4| EXTRACT_PIPELINE_5F350230
-    TESTS_FIXTURES_B84B1DCC -->|imports x3| SERVE_API_35EC8E86
-    SERVE_API_35EC8E86 -->|imports x3| TESTS_FIXTURES_B84B1DCC
-    TESTS_FIXTURES_B84B1DCC -->|re exports x2| DATABASE_6D613A1E
-    DATABASE_6D613A1E -->|imports x2| TESTS_FIXTURES_B84B1DCC
-    DATABASE_6D613A1E -->|imports x2| CLI_SKILLS_9964CBB8
-    CLI_SKILLS_9964CBB8 -->|imports| SERVE_API_35EC8E86
-    CLI_SKILLS_9964CBB8 -->|imports| EXTRACT_PIPELINE_5F350230
-    DATABASE_6D613A1E -->|imports| SERVE_API_35EC8E86
-    SERVE_API_35EC8E86 -->|imports| CLI_SKILLS_9964CBB8
+    EXTRACT_PIPELINE_5F350230 -->|contains x11| TESTS_FIXTURES_B84B1DCC
+    SECURITY_GLOBAL_5B9C6A04 -->|imports x5| TESTS_FIXTURES_B84B1DCC
+    EXTRACT_PIPELINE_5F350230 -->|contains x4| CLI_SKILLS_9964CBB8
+    SECURITY_GLOBAL_5B9C6A04 -->|imports x3| EXTRACT_PIPELINE_5F350230
+    TESTS_FIXTURES_B84B1DCC -->|references x3| EXTRACT_PIPELINE_5F350230
+    EXTRACT_PIPELINE_5F350230 -->|imports x3| SERVE_API_35EC8E86
+    DATABASE_6D613A1E -->|imports x3| EXTRACT_PIPELINE_5F350230
+    TESTS_FIXTURES_B84B1DCC -->|references x2| SECURITY_GLOBAL_5B9C6A04
+    EXTRACT_PIPELINE_5F350230 -->|re exports x2| DATABASE_6D613A1E
+    SERVE_API_35EC8E86 -->|imports x2| EXTRACT_PIPELINE_5F350230
+    SERVE_API_35EC8E86 -->|method x2| TESTS_FIXTURES_B84B1DCC
+    SECURITY_GLOBAL_5B9C6A04 -->|imports| SERVE_API_35EC8E86
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -128,19 +131,19 @@ flowchart LR
     <h4>Architecture Layers</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>Layer</th><th>Nodes</th><th>Communities</th></tr>
-      <tr><td>Extraction Pipeline</td><td>9</td><td><code>6</code></td></tr><tr><td>Graph Build</td><td>15</td><td><code>10</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>32</td><td><code>4, 7</code></td></tr><tr><td>Serving API</td><td>36</td><td><code>0</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>99</td><td><code>1, 2, 5</code></td></tr><tr><td>Module Detail</td><td>27</td><td><code>9</code></td></tr><tr><td>Database</td><td>18</td><td><code>3</code></td></tr><tr><td>Application</td><td>3</td><td><code>11</code></td></tr><tr><td>gpio_reader.py</td><td>1</td><td><code>8</code></td></tr>
+      <tr><td>Extraction Pipeline</td><td>35</td><td><code>5, 6</code></td></tr><tr><td>Graph Build</td><td>15</td><td><code>10</code></td></tr><tr><td>CLI &amp; Skill Installers</td><td>14</td><td><code>12, 7</code></td></tr><tr><td>Serving API</td><td>36</td><td><code>0</code></td></tr><tr><td>Security &amp; Global Graph</td><td>18</td><td><code>4</code></td></tr><tr><td>Tests &amp; Fixtures</td><td>75</td><td><code>1, 2</code></td></tr><tr><td>Module Detail</td><td>27</td><td><code>9</code></td></tr><tr><td>Database</td><td>18</td><td><code>3</code></td></tr><tr><td>Application</td><td>3</td><td><code>11</code></td></tr><tr><td>gpio_reader.py</td><td>1</td><td><code>8</code></td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Core Flow</h4>
-    <div class="arrow-chain">Graph Build -&gt; Extraction Pipeline -&gt; Tests &amp; Fixtures -&gt; CLI &amp; Skill Installers -&gt; Serving API -&gt; Module Detail -&gt; Database</div>
+    <div class="arrow-chain">Graph Build -&gt; Extraction Pipeline -&gt; Tests &amp; Fixtures -&gt; Security &amp; Global Graph -&gt; Serving API -&gt; CLI &amp; Skill Installers -&gt; Module Detail</div>
   </div>
 </div>
 <div class="grid">
   <div class="card">
     <h4>Graph Report Highlights</h4>
     <ul>
-      <li>240 nodes · 422 edges · 12 communities (10 shown, 2 thin omitted)</li>
+      <li>242 nodes · 424 edges · 13 communities (11 shown, 2 thin omitted)</li>
       <li>Extraction: 89% EXTRACTED · 11% INFERRED · 0% AMBIGUOUS · INFERRED: 45 edges (avg confidence: 0.59)</li>
       <li>Token cost: 0 input · 0 output</li>
       <li>1. `GPIOHandler` - 29 edges</li>
@@ -152,32 +155,77 @@ flowchart LR
 <hr>
 <!-- ====== 2. Extraction Pipeline ====== -->
 <h2 id="extract-pipeline">2. Extraction Pipeline</h2>
-<p>Extraction Pipeline groups implementation around register, parserpy, energy, collector, mostly in energy-collector/core/register_parser.py. This section covers 9 nodes and 9 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>Extraction Pipeline groups implementation around energy, collector, modbus, clientpy, mostly in energy-collector/core/modbus_client.py, energy-collector/core/register_parser.py, energy-collector/core/buffer.py. This section covers 35 nodes and 54 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Extraction Pipeline (9 nodes, 9 edges)
-    energy_collector_core_register_parser_words_to_b_d9895a4d("_words_to_bytes()<br/><small>energy-collector/core/register_parser.py</small>")
-    energy_collector_core_register_parser_decode_reg_76879259("decode_register()<br/><small>energy-collector/core/register_parser.py</small>")
-    energy_collector_core_register_parser_registerpa_44886fd9("parse_block()<br/><small>energy-collector/core/register_parser.py</small>")
-    energy_collector_core_register_parser_apply_mete_31d2a751("apply_meter_conversion()<br/><small>energy-collector/core/register_parser.py</small>")
-    energy_collector_core_register_parser_d8f33746("register_parser.py")
-    energy_collector_core_register_parser_rationale_d243b870("Decode raw Modbus register (list 16-bit...<br/><small>energy-collector/core/register_parser.py</small>")
-    energy_collector_core_register_parser_rationale_051da7ca("Decode satu nilai dari list word mentah...<br/><small>energy-collector/core/register_parser.py</small>")
-    energy_collector_core_register_parser_rationale_4083bd2c("Ekstrak semua register yang alamatnya j...<br/><small>energy-collector/core/register_parser.py</small>")
-    energy_collector_core_register_parser_rationale_21746303("Konversi raw → engineering sesuai rumus...<br/><small>energy-collector/core/register_parser.py</small>")
+    %% Section: Extraction Pipeline (35 nodes, 54 edges)
+    subgraph extract_pipeline_energy_collector_core_modbus_cl_27da866f["energy-collector/core/modbus_client.py"]
+        energy_collector_core_modbus_client_modbuspoller_b3af3315("ModbusPoller<br/><small>energy-collector/core/modbus_client.py</small>")
+        energy_collector_core_modbus_client_b5154465("modbus_client.py")
+        energy_collector_core_modbus_client_modbuspoller_8c57f1a9("run()<br/><small>energy-collector/core/modbus_client.py</small>")
+        energy_collector_core_modbus_client_modbuspoller_e166ca78("_ensure_connected()<br/><small>energy-collector/core/modbus_client.py</small>")
+        energy_collector_core_modbus_client_modbuspoller_2918f3a1("_gpio_context()<br/><small>energy-collector/core/modbus_client.py</small>")
+        energy_collector_core_modbus_client_modbuspoller_6204a793("_maybe_persist_history()<br/><small>energy-collector/core/modbus_client.py</small>")
+        energy_collector_core_modbus_client_modbuspoller_30147c36("_poll_once()<br/><small>energy-collector/core/modbus_client.py</small>")
+        energy_collector_core_modbus_client_modbuspoller_12f6f3e0("_read_device_info()<br/><small>energy-collector/core/modbus_client.py</small>")
+        energy_collector_core_modbus_client_modbuspoller_f748f40d("_reconnect()<br/><small>energy-collector/core/modbus_client.py</small>")
+        energy_collector_core_modbus_client_modbuspoller_95f7cee9("_running_seconds()<br/><small>energy-collector/core/modbus_client.py</small>")
+        energy_collector_core_modbus_client_modbuspoller_af514047("stop()<br/><small>energy-collector/core/modbus_client.py</small>")
+    end
+    subgraph extract_pipeline_energy_collector_core_register_caf55e93["energy-collector/core/register_parser.py"]
+        energy_collector_core_register_parser_words_to_b_d9895a4d("_words_to_bytes()<br/><small>energy-collector/core/register_parser.py</small>")
+        energy_collector_core_register_parser_decode_reg_76879259("decode_register()<br/><small>energy-collector/core/register_parser.py</small>")
+        energy_collector_core_register_parser_registerpa_44886fd9("parse_block()<br/><small>energy-collector/core/register_parser.py</small>")
+    end
+    energy_collector_core_init_b223879c("__init__.py")
+    energy_collector_core_buffer_605a5818("buffer.py")
+    energy_collector_core_redis_publisher_628b4423("redis_publisher.py")
+    energy_collector_models_meter_reading_c2a915cf("meter_reading.py")
+    energy_collector_core_modbus_client_modbuspoller_b3af3315 -->|method| energy_collector_core_modbus_client_modbuspoller_e166ca78
+    energy_collector_core_modbus_client_modbuspoller_b3af3315 -->|method| energy_collector_core_modbus_client_modbuspoller_2918f3a1
+    energy_collector_core_modbus_client_modbuspoller_b3af3315 -->|method| energy_collector_core_modbus_client_modbuspoller_6204a793
+    energy_collector_core_modbus_client_modbuspoller_b3af3315 -->|method| energy_collector_core_modbus_client_modbuspoller_30147c36
+    energy_collector_core_modbus_client_modbuspoller_b3af3315 -->|method| energy_collector_core_modbus_client_modbuspoller_12f6f3e0
+    energy_collector_core_modbus_client_modbuspoller_b3af3315 -->|method| energy_collector_core_modbus_client_modbuspoller_f748f40d
+    energy_collector_core_modbus_client_modbuspoller_b3af3315 -->|method| energy_collector_core_modbus_client_modbuspoller_8c57f1a9
+    energy_collector_core_modbus_client_modbuspoller_b3af3315 -->|method| energy_collector_core_modbus_client_modbuspoller_95f7cee9
+    energy_collector_core_modbus_client_modbuspoller_b3af3315 -->|method| energy_collector_core_modbus_client_modbuspoller_af514047
+    energy_collector_core_modbus_client_modbuspoller_8c57f1a9 -->|calls| energy_collector_core_modbus_client_modbuspoller_e166ca78
+    energy_collector_core_modbus_client_modbuspoller_8c57f1a9 -->|calls| energy_collector_core_modbus_client_modbuspoller_30147c36
+    energy_collector_core_modbus_client_modbuspoller_8c57f1a9 -->|calls| energy_collector_core_modbus_client_modbuspoller_12f6f3e0
+    energy_collector_core_modbus_client_modbuspoller_8c57f1a9 -->|calls| energy_collector_core_modbus_client_modbuspoller_f748f40d
+    energy_collector_core_modbus_client_modbuspoller_2918f3a1 -->|calls| energy_collector_core_modbus_client_modbuspoller_30147c36
+    energy_collector_core_modbus_client_modbuspoller_95f7cee9 -->|calls| energy_collector_core_modbus_client_modbuspoller_30147c36
+    energy_collector_core_modbus_client_modbuspoller_30147c36 -->|calls| energy_collector_core_modbus_client_modbuspoller_6204a793
+    energy_collector_core_modbus_client_modbuspoller_12f6f3e0 -->|calls| energy_collector_core_modbus_client_modbuspoller_f748f40d
+    energy_collector_core_modbus_client_modbuspoller_e166ca78 -->|calls| energy_collector_core_modbus_client_modbuspoller_f748f40d
     energy_collector_core_register_parser_words_to_b_d9895a4d -->|calls| energy_collector_core_register_parser_decode_reg_76879259
     energy_collector_core_register_parser_decode_reg_76879259 -->|calls| energy_collector_core_register_parser_registerpa_44886fd9
+    energy_collector_core_init_b223879c -->|imports| energy_collector_core_modbus_client_modbuspoller_b3af3315
+    energy_collector_core_buffer_605a5818 -->|imports| energy_collector_models_meter_reading_c2a915cf
+    energy_collector_core_buffer_605a5818 -->|imports| energy_collector_core_modbus_client_b5154465
+    energy_collector_core_modbus_client_b5154465 -->|imports| energy_collector_core_redis_publisher_628b4423
+    %% Omitted for readability: 17 nodes, 2 edges
+    class energy_collector_core_modbus_client_modbuspoller_b3af3315 klass;
+    class energy_collector_core_modbus_client_b5154465 entry;
+    class energy_collector_core_modbus_client_modbuspoller_8c57f1a9 function;
+    class energy_collector_core_modbus_client_modbuspoller_e166ca78 function;
+    class energy_collector_core_modbus_client_modbuspoller_2918f3a1 function;
+    class energy_collector_core_modbus_client_modbuspoller_6204a793 function;
+    class energy_collector_core_modbus_client_modbuspoller_30147c36 function;
+    class energy_collector_core_modbus_client_modbuspoller_12f6f3e0 function;
+    class energy_collector_core_modbus_client_modbuspoller_f748f40d function;
+    class energy_collector_core_modbus_client_modbuspoller_95f7cee9 function;
+    class energy_collector_core_modbus_client_modbuspoller_af514047 function;
     class energy_collector_core_register_parser_words_to_b_d9895a4d function;
     class energy_collector_core_register_parser_decode_reg_76879259 function;
     class energy_collector_core_register_parser_registerpa_44886fd9 function;
-    class energy_collector_core_register_parser_apply_mete_31d2a751 function;
-    class energy_collector_core_register_parser_d8f33746 module;
-    class energy_collector_core_register_parser_rationale_d243b870 concept;
-    class energy_collector_core_register_parser_rationale_051da7ca concept;
-    class energy_collector_core_register_parser_rationale_4083bd2c concept;
-    class energy_collector_core_register_parser_rationale_21746303 concept;
+    class energy_collector_core_init_b223879c module;
+    class energy_collector_core_buffer_605a5818 module;
+    class energy_collector_core_redis_publisher_628b4423 module;
+    class energy_collector_models_meter_reading_c2a915cf module;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -201,14 +249,70 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>register_parser.py</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
+  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/core/__init__.py</small></td>
   <td><span class="tag tag-class">Module</span></td>
   <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Module file in energy-collector/core/register_parser.py.</td>
+  <td><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td>Module file in energy-collector/core/__init__.py.</td>
 </tr>
 <tr>
   <td>2</td>
+  <td><code>buffer.py</code><br><small style="color:var(--muted)">energy-collector/core/buffer.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>main.py</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>meter_reading.py</code><br><small style="color:var(--muted)">energy-collector/models/meter_reading.py</small><br><code>modbus_client.py</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td>Module file in energy-collector/core/buffer.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Ring buffer per meter untuk konsumsi frontend (live view).  Selalu menerima samp</code><br><small style="color:var(--muted)">energy-collector/core/buffer.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Ring buffer per meter untuk konsumsi frontend (live view).  Selalu menerima samp.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>modbus_client.py</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-cmd">Entry</span></td>
+  <td><code>buffer.py</code><br><small style="color:var(--muted)">energy-collector/core/buffer.py</small></td>
+  <td><code>main.py</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>meter_reading.py</code><br><small style="color:var(--muted)">energy-collector/models/meter_reading.py</small><br><code>redis_publisher.py</code><br><small style="color:var(--muted)">energy-collector/core/redis_publisher.py</small><br>+1 more</td>
+  <td>Module file in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>Polling loop Modbus per meter (asyncio task).  Tiap cycle (default 500ms): baca</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Polling loop Modbus per meter (asyncio task).  Tiap cycle (default 500ms): baca.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>redis_publisher.py</code><br><small style="color:var(--muted)">energy-collector/core/redis_publisher.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td><code>modbus_client.py</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><code>main.py</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>meter_reading.py</code><br><small style="color:var(--muted)">energy-collector/models/meter_reading.py</small></td>
+  <td>Module file in energy-collector/core/redis_publisher.py.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>Publish sample buffer &amp; device info ke Redis untuk konsumsi service API terpisah</code><br><small style="color:var(--muted)">energy-collector/core/redis_publisher.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Publish sample buffer &amp; device info ke Redis untuk konsumsi service API terpisah.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>register_parser.py</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td><code>modbus_client.py</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><code>main.py</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
+  <td>Module file in energy-collector/core/register_parser.py.</td>
+</tr>
+<tr>
+  <td>9</td>
   <td><code>_words_to_bytes()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
@@ -216,7 +320,7 @@ flowchart LR
   <td>_words_to_bytes() node in energy-collector/core/register_parser.py.</td>
 </tr>
 <tr>
-  <td>3</td>
+  <td>10</td>
   <td><code>decode_register()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>_words_to_bytes()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
@@ -224,15 +328,7 @@ flowchart LR
   <td>decode_register() node in energy-collector/core/register_parser.py.</td>
 </tr>
 <tr>
-  <td>4</td>
-  <td><code>apply_meter_conversion()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>apply_meter_conversion() node in energy-collector/core/register_parser.py.</td>
-</tr>
-<tr>
-  <td>5</td>
+  <td>11</td>
   <td><code>.parse_block()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>decode_register()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
@@ -240,7 +336,7 @@ flowchart LR
   <td>.parse_block() node in energy-collector/core/register_parser.py.</td>
 </tr>
 <tr>
-  <td>6</td>
+  <td>12</td>
   <td><code>Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -248,7 +344,7 @@ flowchart LR
   <td>Design note for Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind.</td>
 </tr>
 <tr>
-  <td>7</td>
+  <td>13</td>
   <td><code>Decode satu nilai dari list word mentah. Return None kalau gagal.</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
@@ -256,20 +352,140 @@ flowchart LR
   <td>Design note for Decode satu nilai dari list word mentah. Return None kalau gagal..</td>
 </tr>
 <tr>
-  <td>8</td>
-  <td><code>Konversi raw → engineering sesuai rumus UrAt/IrAt.      U  = URMS × (UrAt×0.1)×0</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Konversi raw → engineering sesuai rumus UrAt/IrAt.      U  = URMS × (UrAt×0.1)×0.</td>
-</tr>
-<tr>
-  <td>9</td>
+  <td>14</td>
   <td><code>Ekstrak semua register yang alamatnya jatuh di dalam blok ini.</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>Design note for Ekstrak semua register yang alamatnya jatuh di dalam blok ini..</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>main.py</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td><code>buffer.py</code><br><small style="color:var(--muted)">energy-collector/core/buffer.py</small><br><code>modbus_client.py</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>redis_publisher.py</code><br><small style="color:var(--muted)">energy-collector/core/redis_publisher.py</small><br>+1 more</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in energy-collector/main.py.</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Entry point Energy Meter Collection System.  Orkestrasi: load config → init GPIO</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Entry point Energy Meter Collection System.  Orkestrasi: load config → init GPIO.</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>meter_reading.py</code><br><small style="color:var(--muted)">energy-collector/models/meter_reading.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td><code>buffer.py</code><br><small style="color:var(--muted)">energy-collector/core/buffer.py</small><br><code>modbus_client.py</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>redis_publisher.py</code><br><small style="color:var(--muted)">energy-collector/core/redis_publisher.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>Module file in energy-collector/models/meter_reading.py.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Payload satu sample pembacaan meter.</code><br><small style="color:var(--muted)">energy-collector/models/meter_reading.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Payload satu sample pembacaan meter..</td>
+</tr>
+<tr>
+  <td>19</td>
+  <td><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/core/__init__.py</small></td>
+  <td><code>_ensure_connected()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>_gpio_context()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>_maybe_persist_history()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br>+6 more</td>
+  <td>ModbusPoller node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>20</td>
+  <td><code>.stop()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.stop() node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>21</td>
+  <td><code>.run()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><code>_ensure_connected()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>_poll_once()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>_read_device_info()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br>+1 more</td>
+  <td>.run() node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>22</td>
+  <td><code>._gpio_context()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><code>_poll_once()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td>._gpio_context() node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>23</td>
+  <td><code>._running_seconds()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><code>_poll_once()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td>._running_seconds() node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>24</td>
+  <td><code>._poll_once()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>_gpio_context()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>_running_seconds()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br>+1 more</td>
+  <td><code>_maybe_persist_history()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>apply_meter_conversion()</code><br><small style="color:var(--muted)">energy-collector/core/register_parser.py</small></td>
+  <td>._poll_once() node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>25</td>
+  <td><code>._maybe_persist_history()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>_poll_once()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>._maybe_persist_history() node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>26</td>
+  <td><code>._read_device_info()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>run()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><code>_reconnect()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td>._read_device_info() node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>27</td>
+  <td><code>._ensure_connected()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>run()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><code>_reconnect()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td>._ensure_connected() node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>28</td>
+  <td><code>._reconnect()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>_ensure_connected()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>_read_device_info()</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br>+1 more</td>
+  <td>No direct outbound edge</td>
+  <td>._reconnect() node in energy-collector/core/modbus_client.py.</td>
+</tr>
+<tr>
+  <td>29</td>
+  <td><code>Satu poller per meter.</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Satu poller per meter..</td>
+</tr>
+<tr>
+  <td>30</td>
+  <td><code>Entry point asyncio task.</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Entry point asyncio task..</td>
 </tr>
 </table>
 
@@ -278,12 +494,18 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>energy-collector/core/register_parser.py</code></td><td>9 nodes</td></tr>
+      <tr><td><code>energy-collector/core/modbus_client.py</code></td><td>17 nodes</td></tr>
+<tr><td><code>energy-collector/core/register_parser.py</code></td><td>9 nodes</td></tr>
+<tr><td><code>energy-collector/core/buffer.py</code></td><td>2 nodes</td></tr>
+<tr><td><code>energy-collector/core/redis_publisher.py</code></td><td>2 nodes</td></tr>
+<tr><td><code>energy-collector/main.py</code></td><td>2 nodes</td></tr>
+<tr><td><code>energy-collector/models/meter_reading.py</code></td><td>2 nodes</td></tr>
+<tr><td><code>energy-collector/core/__init__.py</code></td><td>1 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: explains x4, contains x3, calls x2. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: explains x14, calls x11, imports x10, method x9. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -500,37 +722,30 @@ flowchart LR
 
 <!-- ====== 4. CLI & Skill Installers ====== -->
 <h2 id="cli-skills">4. CLI &amp; Skill Installers</h2>
-<p>CLI &amp; Skill Installers groups implementation around energy, collector, config, mainpy, mostly in energy-collector/main.py, energy-collector/config/settings.py, energy-collector/deploy/install-service.sh. This section covers 32 nodes and 49 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<p>CLI &amp; Skill Installers groups implementation around energy, collector, mainpy, install, mostly in energy-collector/main.py, energy-collector/deploy/install-service.sh. This section covers 14 nodes and 16 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: CLI &amp; Skill Installers (32 nodes, 49 edges)
+    %% Section: CLI &amp; Skill Installers (14 nodes, 16 edges)
     subgraph cli_skills_energy_collector_main_py_20d8b9aa["energy-collector/main.py"]
         energy_collector_main_application_0efa976d("Application<br/><small>energy-collector/main.py</small>")
         energy_collector_main_setup_logging_c70eceef("setup_logging()<br/><small>energy-collector/main.py</small>")
         energy_collector_main_application_start_cdfa6c85("start()<br/><small>energy-collector/main.py</small>")
+        energy_collector_main_application_request_shutdo_ab61b510("request_shutdown()<br/><small>energy-collector/main.py</small>")
+        energy_collector_main_application_schedule_bcfce2a0("_schedule()<br/><small>energy-collector/main.py</small>")
         energy_collector_main_amain_2fbf4bde("_amain()<br/><small>energy-collector/main.py</small>")
         energy_collector_main_application_cleanup_daae328e("_cleanup()<br/><small>energy-collector/main.py</small>")
         energy_collector_main_application_db_close_cycle_f86f5b2d("_db_close_cycle()<br/><small>energy-collector/main.py</small>")
         energy_collector_main_application_db_open_cycle_1d376039("_db_open_cycle()<br/><small>energy-collector/main.py</small>")
         energy_collector_main_application_init_c5a36735("__init__()<br/><small>energy-collector/main.py</small>")
-        energy_collector_main_application_request_shutdo_ab61b510("request_shutdown()<br/><small>energy-collector/main.py</small>")
-        energy_collector_main_application_schedule_bcfce2a0("_schedule()<br/><small>energy-collector/main.py</small>")
         energy_collector_main_main_0eb6d11f("main()<br/><small>energy-collector/main.py</small>")
+        energy_collector_main_rationale_35_6c31678f("Konfigurasi structlog → output JSON ke...<br/><small>energy-collector/main.py</small>")
     end
-    subgraph cli_skills_energy_collector_config_settings_py_eb71a18f["energy-collector/config/settings.py"]
-        energy_collector_config_settings_settings_6f699754("Settings<br/><small>energy-collector/config/settings.py</small>")
-        energy_collector_config_settings_23e4670a("settings.py")
-        energy_collector_config_settings_settings_poll_i_69802f23("poll_interval_seconds()<br/><small>energy-collector/config/settings.py</small>")
-        energy_collector_config_settings_settings_resolv_84011b48("resolve_path()<br/><small>energy-collector/config/settings.py</small>")
-        energy_collector_config_settings_load_meters_99d1bc8b("load_meters()<br/><small>energy-collector/config/settings.py</small>")
-        energy_collector_config_settings_assert_unique_e3444dbb("_assert_unique()<br/><small>energy-collector/config/settings.py</small>")
+    subgraph cli_skills_energy_collector_deploy_install_servi_84d0b087["energy-collector/deploy/install-service.sh"]
+        energy_collector_deploy_install_service_5cf0438b("install-service.sh")
+        energy_collector_deploy_install_service_sh_entry_90d39b4f("install-service.sh script<br/><small>energy-collector/deploy/install-service.sh</small>")
     end
-    energy_collector_config_init_7d038f68("__init__.py")
-    energy_collector_config_settings_settings_6f699754 -->|method| energy_collector_config_settings_settings_poll_i_69802f23
-    energy_collector_config_settings_settings_6f699754 -->|method| energy_collector_config_settings_settings_resolv_84011b48
-    energy_collector_config_settings_load_meters_99d1bc8b -->|calls| energy_collector_config_settings_assert_unique_e3444dbb
     energy_collector_main_setup_logging_c70eceef -->|calls| energy_collector_main_amain_2fbf4bde
     energy_collector_main_application_0efa976d -->|calls| energy_collector_main_amain_2fbf4bde
     energy_collector_main_application_0efa976d -->|method| energy_collector_main_application_cleanup_daae328e
@@ -545,27 +760,20 @@ flowchart LR
     energy_collector_main_application_start_cdfa6c85 -->|calls| energy_collector_main_application_cleanup_daae328e
     energy_collector_main_application_request_shutdo_ab61b510 -->|calls| energy_collector_main_amain_2fbf4bde
     energy_collector_main_amain_2fbf4bde -->|calls| energy_collector_main_main_0eb6d11f
-    energy_collector_config_init_7d038f68 -->|imports| energy_collector_config_settings_load_meters_99d1bc8b
-    energy_collector_config_init_7d038f68 -->|imports| energy_collector_config_settings_settings_6f699754
-    %% Omitted for readability: 14 nodes, 0 edges
     class energy_collector_main_application_0efa976d klass;
     class energy_collector_main_setup_logging_c70eceef function;
     class energy_collector_main_application_start_cdfa6c85 function;
+    class energy_collector_main_application_request_shutdo_ab61b510 function;
+    class energy_collector_main_application_schedule_bcfce2a0 function;
     class energy_collector_main_amain_2fbf4bde function;
     class energy_collector_main_application_cleanup_daae328e function;
     class energy_collector_main_application_db_close_cycle_f86f5b2d function;
     class energy_collector_main_application_db_open_cycle_1d376039 function;
     class energy_collector_main_application_init_c5a36735 function;
-    class energy_collector_main_application_request_shutdo_ab61b510 function;
-    class energy_collector_main_application_schedule_bcfce2a0 function;
     class energy_collector_main_main_0eb6d11f function;
-    class energy_collector_config_settings_settings_6f699754 klass;
-    class energy_collector_config_settings_23e4670a module;
-    class energy_collector_config_settings_settings_poll_i_69802f23 function;
-    class energy_collector_config_settings_settings_resolv_84011b48 function;
-    class energy_collector_config_settings_load_meters_99d1bc8b function;
-    class energy_collector_config_settings_assert_unique_e3444dbb async;
-    class energy_collector_config_init_7d038f68 module;
+    class energy_collector_main_rationale_35_6c31678f concept;
+    class energy_collector_deploy_install_service_5cf0438b function;
+    class energy_collector_deploy_install_service_sh_entry_90d39b4f function;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -589,142 +797,6 @@ flowchart LR
 </tr>
 <tr>
   <td>1</td>
-  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
-  <td><span class="tag tag-class">Module</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>get_settings()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>load_meters()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>load_registers()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br>+1 more</td>
-  <td>Module file in energy-collector/config/__init__.py.</td>
-</tr>
-<tr>
-  <td>2</td>
-  <td><code>settings.py</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-class">Module</span></td>
-  <td>External entry / no inbound edge</td>
-  <td><code>main.py</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
-  <td>Module file in energy-collector/config/settings.py.</td>
-</tr>
-<tr>
-  <td>3</td>
-  <td><code>Settings</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
-  <td><code>poll_interval_seconds()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>resolve_path()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td>Settings node in energy-collector/config/settings.py.</td>
-</tr>
-<tr>
-  <td>4</td>
-  <td><code>BaseSettings</code><br><small style="color:var(--muted)"></small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>BaseSettings node in project.</td>
-</tr>
-<tr>
-  <td>5</td>
-  <td><code>.poll_interval_seconds()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>Settings</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>.poll_interval_seconds() node in energy-collector/config/settings.py.</td>
-</tr>
-<tr>
-  <td>6</td>
-  <td><code>.resolve_path()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>Settings</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>.resolve_path() node in energy-collector/config/settings.py.</td>
-</tr>
-<tr>
-  <td>7</td>
-  <td><code>Path</code><br><small style="color:var(--muted)"></small></td>
-  <td><span class="tag tag-class">Class</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Path node in project.</td>
-</tr>
-<tr>
-  <td>8</td>
-  <td><code>load_meters()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
-  <td><code>_assert_unique()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>start()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
-  <td>load_meters() node in energy-collector/config/settings.py.</td>
-</tr>
-<tr>
-  <td>9</td>
-  <td><code>load_registers()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
-  <td><code>start()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
-  <td>load_registers() node in energy-collector/config/settings.py.</td>
-</tr>
-<tr>
-  <td>10</td>
-  <td><code>_assert_unique()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-async">Async</span></td>
-  <td><code>load_meters()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>_assert_unique() node in energy-collector/config/settings.py.</td>
-</tr>
-<tr>
-  <td>11</td>
-  <td><code>get_settings()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Function</span></td>
-  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
-  <td><code>__init__()</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>_amain()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
-  <td>get_settings() node in energy-collector/config/settings.py.</td>
-</tr>
-<tr>
-  <td>12</td>
-  <td><code>Konfigurasi global aplikasi.  Parameter dibaca dari environment / file `.env` vi</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Konfigurasi global aplikasi.  Parameter dibaca dari environment / file `.env` vi.</td>
-</tr>
-<tr>
-  <td>13</td>
-  <td><code>Parameter global dari `.env` / environment.</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Parameter global dari `.env` / environment..</td>
-</tr>
-<tr>
-  <td>14</td>
-  <td><code>Resolusi path relatif terhadap root project.</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Resolusi path relatif terhadap root project..</td>
-</tr>
-<tr>
-  <td>15</td>
-  <td><code>Muat daftar meter dari YAML. Raise kalau file/format invalid.</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Muat daftar meter dari YAML. Raise kalau file/format invalid..</td>
-</tr>
-<tr>
-  <td>16</td>
-  <td><code>Muat register map dari YAML. Raise kalau file/format invalid.</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Muat register map dari YAML. Raise kalau file/format invalid..</td>
-</tr>
-<tr>
-  <td>17</td>
-  <td><code>main.py</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
-  <td><span class="tag tag-class">Module</span></td>
-  <td><code>settings.py</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td>No direct outbound edge</td>
-  <td>Module file in energy-collector/main.py.</td>
-</tr>
-<tr>
-  <td>18</td>
   <td><code>setup_logging()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td>External entry / no inbound edge</td>
@@ -732,7 +804,7 @@ flowchart LR
   <td>setup_logging() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>19</td>
+  <td>2</td>
   <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
@@ -740,15 +812,15 @@ flowchart LR
   <td>Application node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>20</td>
+  <td>3</td>
   <td><code>.__init__()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
-  <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>get_settings()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td>No direct outbound edge</td>
   <td>.__init__() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>21</td>
+  <td>4</td>
   <td><code>._schedule()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
@@ -756,15 +828,15 @@ flowchart LR
   <td>._schedule() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>22</td>
+  <td>5</td>
   <td><code>.start()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
-  <td><code>_schedule()</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>load_meters()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br>+1 more</td>
+  <td><code>_schedule()</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><code>_amain()</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>_cleanup()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td>.start() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>23</td>
+  <td>6</td>
   <td><code>._cleanup()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>start()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
@@ -772,7 +844,7 @@ flowchart LR
   <td>._cleanup() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>24</td>
+  <td>7</td>
   <td><code>.request_shutdown()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
@@ -780,7 +852,7 @@ flowchart LR
   <td>.request_shutdown() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>25</td>
+  <td>8</td>
   <td><code>._db_open_cycle()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
@@ -788,7 +860,7 @@ flowchart LR
   <td>._db_open_cycle() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>26</td>
+  <td>9</td>
   <td><code>._db_close_cycle()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
@@ -796,15 +868,15 @@ flowchart LR
   <td>._db_close_cycle() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>27</td>
+  <td>10</td>
   <td><code>_amain()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
-  <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>get_settings()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>request_shutdown()</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br>+2 more</td>
+  <td><code>Application</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>request_shutdown()</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br><code>setup_logging()</code><br><small style="color:var(--muted)">energy-collector/main.py</small><br>+1 more</td>
   <td><code>main()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td>_amain() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>28</td>
+  <td>11</td>
   <td><code>main()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Function</span></td>
   <td><code>_amain()</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
@@ -812,20 +884,28 @@ flowchart LR
   <td>main() node in energy-collector/main.py.</td>
 </tr>
 <tr>
-  <td>29</td>
-  <td><code>Entry point Energy Meter Collection System.  Orkestrasi: load config → init GPIO</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
-  <td><span class="tag tag-func">Concept</span></td>
-  <td>External entry / no inbound edge</td>
-  <td>No direct outbound edge</td>
-  <td>Design note for Entry point Energy Meter Collection System.  Orkestrasi: load config → init GPIO.</td>
-</tr>
-<tr>
-  <td>30</td>
+  <td>12</td>
   <td><code>Konfigurasi structlog → output JSON ke stdout.</code><br><small style="color:var(--muted)">energy-collector/main.py</small></td>
   <td><span class="tag tag-func">Concept</span></td>
   <td>External entry / no inbound edge</td>
   <td>No direct outbound edge</td>
   <td>Design note for Konfigurasi structlog → output JSON ke stdout..</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>install-service.sh</code><br><small style="color:var(--muted)">energy-collector/deploy/install-service.sh</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>install-service.sh node in energy-collector/deploy/install-service.sh.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>install-service.sh script</code><br><small style="color:var(--muted)">energy-collector/deploy/install-service.sh</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>install-service.sh script node in energy-collector/deploy/install-service.sh.</td>
 </tr>
 </table>
 
@@ -834,15 +914,13 @@ flowchart LR
     <h4>Key Files</h4>
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
-      <tr><td><code>energy-collector/main.py</code></td><td>14 nodes</td></tr>
-<tr><td><code>energy-collector/config/settings.py</code></td><td>13 nodes</td></tr>
+      <tr><td><code>energy-collector/main.py</code></td><td>12 nodes</td></tr>
 <tr><td><code>energy-collector/deploy/install-service.sh</code></td><td>2 nodes</td></tr>
-<tr><td><code>energy-collector/config/__init__.py</code></td><td>1 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: contains x10, method x9, calls x8, explains x7. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: calls x7, method x7, contains x1, explains x1. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
@@ -1194,14 +1272,253 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 6. Tests & Fixtures ====== -->
-<h2 id="tests-fixtures">6. Tests &amp; Fixtures</h2>
-<p>Tests &amp; Fixtures groups implementation around energy, collector, modbus, hardware, mostly in core/hardware/modbus_backend.py, energy-collector/core/modbus_client.py, energy-collector/core/redis_publisher.py. This section covers 99 nodes and 172 internal edges; the diagram shows only representative relationships to stay readable.</p>
+<!-- ====== 6. Security & Global Graph ====== -->
+<h2 id="security-global">6. Security &amp; Global Graph</h2>
+<p>Security &amp; Global Graph groups implementation around energy, collector, config, settingspy, mostly in energy-collector/config/settings.py, energy-collector/config/__init__.py. This section covers 18 nodes and 25 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
 %%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
 flowchart LR
-    %% Section: Tests &amp; Fixtures (99 nodes, 172 edges)
+    %% Section: Security &amp; Global Graph (18 nodes, 25 edges)
+    subgraph security_global_energy_collector_config_settings_12c11d67["energy-collector/config/settings.py"]
+        energy_collector_config_settings_settings_6f699754("Settings<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_load_meters_99d1bc8b("load_meters()<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_settings_gpio_e_3a55ccb8("gpio_enabled()<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_settings_poll_i_69802f23("poll_interval_seconds()<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_settings_resolv_84011b48("resolve_path()<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_assert_unique_e3444dbb("_assert_unique()<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_get_settings_29f6f942("get_settings()<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_load_registers_cf78803c("load_registers()<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_23e4670a("settings.py")
+        energy_collector_config_settings_rationale_68_8f90c76a("GPIO + production_cycles. Auto-off di W...<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_rationale_1_77c2635e("Konfigurasi global aplikasi. Parameter...<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_rationale_144_ce618c83("Muat daftar meter dari YAML. Raise kala...<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_rationale_170_47ae9649("Muat register map dari YAML. Raise kala...<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_rationale_22_3bcab2de("Parameter global dari .env / environm...<br/><small>energy-collector/config/settings.py</small>")
+        energy_collector_config_settings_rationale_74_c879b294("Resolusi path relatif terhadap root pro...<br/><small>energy-collector/config/settings.py</small>")
+    end
+    subgraph security_global_External_generated_3fe5b8bb["External / generated"]
+        basesettings_10620791("BaseSettings")
+        path_3150ecd5("Path")
+    end
+    energy_collector_config_init_7d038f68("__init__.py")
+    energy_collector_config_settings_settings_6f699754 -->|method| energy_collector_config_settings_settings_gpio_e_3a55ccb8
+    energy_collector_config_settings_settings_6f699754 -->|method| energy_collector_config_settings_settings_poll_i_69802f23
+    energy_collector_config_settings_settings_6f699754 -->|method| energy_collector_config_settings_settings_resolv_84011b48
+    energy_collector_config_settings_load_meters_99d1bc8b -->|calls| energy_collector_config_settings_assert_unique_e3444dbb
+    energy_collector_config_init_7d038f68 -->|imports| energy_collector_config_settings_get_settings_29f6f942
+    energy_collector_config_init_7d038f68 -->|imports| energy_collector_config_settings_load_meters_99d1bc8b
+    energy_collector_config_init_7d038f68 -->|imports| energy_collector_config_settings_load_registers_cf78803c
+    energy_collector_config_init_7d038f68 -->|imports| energy_collector_config_settings_settings_6f699754
+    class energy_collector_config_settings_settings_6f699754 klass;
+    class energy_collector_config_settings_load_meters_99d1bc8b function;
+    class energy_collector_config_settings_settings_gpio_e_3a55ccb8 function;
+    class energy_collector_config_settings_settings_poll_i_69802f23 function;
+    class energy_collector_config_settings_settings_resolv_84011b48 function;
+    class energy_collector_config_settings_assert_unique_e3444dbb async;
+    class energy_collector_config_settings_get_settings_29f6f942 function;
+    class energy_collector_config_settings_load_registers_cf78803c function;
+    class energy_collector_config_settings_23e4670a module;
+    class energy_collector_config_settings_rationale_68_8f90c76a concept;
+    class energy_collector_config_settings_rationale_1_77c2635e concept;
+    class energy_collector_config_settings_rationale_144_ce618c83 concept;
+    class energy_collector_config_settings_rationale_170_47ae9649 concept;
+    class energy_collector_config_settings_rationale_22_3bcab2de concept;
+    class energy_collector_config_settings_rationale_74_c879b294 concept;
+    class basesettings_10620791 klass;
+    class path_3150ecd5 klass;
+    class energy_collector_config_init_7d038f68 module;
+    classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
+    classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
+    classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
+    classDef klass fill:#064e3b,stroke:#34d399,color:#d1fae5,stroke-width:1px;
+    classDef ui fill:#831843,stroke:#f472b6,color:#fce7f3,stroke-width:1px;
+    classDef module fill:#172554,stroke:#60a5fa,color:#dbeafe,stroke-width:1px;
+    classDef test fill:#3f3f46,stroke:#a1a1aa,color:#f4f4f5,stroke-width:1px;
+    classDef concept fill:#292524,stroke:#a8a29e,color:#fafaf9,stroke-dasharray:4 3;
+    classDef function fill:#0f172a,stroke:#38bdf8,color:#e0f2fe,stroke-width:1px;
+</div>
+
+<h3>Call Details</h3>
+<table class="call-table">
+<tr>
+  <th style="width:5%">#</th>
+  <th style="width:28%">Node</th>
+  <th style="width:10%">Type</th>
+  <th style="width:17%">Caller</th>
+  <th style="width:20%">Callees</th>
+  <th style="width:20%">Description</th>
+</tr>
+<tr>
+  <td>1</td>
+  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td><code>get_settings()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>load_meters()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>load_registers()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br>+1 more</td>
+  <td>Module file in energy-collector/config/__init__.py.</td>
+</tr>
+<tr>
+  <td>2</td>
+  <td><code>settings.py</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-class">Module</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Module file in energy-collector/config/settings.py.</td>
+</tr>
+<tr>
+  <td>3</td>
+  <td><code>Settings</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
+  <td><code>gpio_enabled()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>poll_interval_seconds()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>resolve_path()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td>Settings node in energy-collector/config/settings.py.</td>
+</tr>
+<tr>
+  <td>4</td>
+  <td><code>BaseSettings</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>BaseSettings node in project.</td>
+</tr>
+<tr>
+  <td>5</td>
+  <td><code>.poll_interval_seconds()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>Settings</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.poll_interval_seconds() node in energy-collector/config/settings.py.</td>
+</tr>
+<tr>
+  <td>6</td>
+  <td><code>.gpio_enabled()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>Settings</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.gpio_enabled() node in energy-collector/config/settings.py.</td>
+</tr>
+<tr>
+  <td>7</td>
+  <td><code>.resolve_path()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>Settings</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>.resolve_path() node in energy-collector/config/settings.py.</td>
+</tr>
+<tr>
+  <td>8</td>
+  <td><code>Path</code><br><small style="color:var(--muted)"></small></td>
+  <td><span class="tag tag-class">Class</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Path node in project.</td>
+</tr>
+<tr>
+  <td>9</td>
+  <td><code>load_meters()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
+  <td><code>_assert_unique()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td>load_meters() node in energy-collector/config/settings.py.</td>
+</tr>
+<tr>
+  <td>10</td>
+  <td><code>load_registers()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>load_registers() node in energy-collector/config/settings.py.</td>
+</tr>
+<tr>
+  <td>11</td>
+  <td><code>_assert_unique()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-async">Async</span></td>
+  <td><code>load_meters()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>_assert_unique() node in energy-collector/config/settings.py.</td>
+</tr>
+<tr>
+  <td>12</td>
+  <td><code>get_settings()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Function</span></td>
+  <td><code>__init__.py</code><br><small style="color:var(--muted)">energy-collector/config/__init__.py</small></td>
+  <td>No direct outbound edge</td>
+  <td>get_settings() node in energy-collector/config/settings.py.</td>
+</tr>
+<tr>
+  <td>13</td>
+  <td><code>Konfigurasi global aplikasi.  Parameter dibaca dari environment / file `.env` vi</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Konfigurasi global aplikasi.  Parameter dibaca dari environment / file `.env` vi.</td>
+</tr>
+<tr>
+  <td>14</td>
+  <td><code>Parameter global dari `.env` / environment.</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Parameter global dari `.env` / environment..</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td><code>GPIO + production_cycles. Auto-off di Windows kecuali ENABLE_GPIO=true.</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for GPIO + production_cycles. Auto-off di Windows kecuali ENABLE_GPIO=true..</td>
+</tr>
+<tr>
+  <td>16</td>
+  <td><code>Resolusi path relatif terhadap root project.</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Resolusi path relatif terhadap root project..</td>
+</tr>
+<tr>
+  <td>17</td>
+  <td><code>Muat daftar meter dari YAML. Raise kalau file/format invalid.      require_gpio:</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Muat daftar meter dari YAML. Raise kalau file/format invalid.      require_gpio:.</td>
+</tr>
+<tr>
+  <td>18</td>
+  <td><code>Muat register map dari YAML. Raise kalau file/format invalid.</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
+  <td><span class="tag tag-func">Concept</span></td>
+  <td>External entry / no inbound edge</td>
+  <td>No direct outbound edge</td>
+  <td>Design note for Muat register map dari YAML. Raise kalau file/format invalid..</td>
+</tr>
+</table>
+
+<div class="grid">
+  <div class="card">
+    <h4>Key Files</h4>
+    <table style="width:100%;font-size:0.85rem;">
+      <tr><th>File</th><th>Coverage</th></tr>
+      <tr><td><code>energy-collector/config/settings.py</code></td><td>15 nodes</td></tr>
+<tr><td><code>energy-collector/config/__init__.py</code></td><td>1 nodes</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h4>Design Notes</h4>
+    <p>This section comes from graphify community clustering. Relationship summary: explains x6, contains x5, imports x4, references x4. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+  </div>
+</div>
+<hr>
+
+<!-- ====== 7. Tests & Fixtures ====== -->
+<h2 id="tests-fixtures">7. Tests &amp; Fixtures</h2>
+<p>Tests &amp; Fixtures groups implementation around energy, collector, modbus, hardware, mostly in core/hardware/modbus_backend.py, energy-collector/core/redis_publisher.py, energy-collector/config/settings.py. This section covers 75 nodes and 116 internal edges; the diagram shows only representative relationships to stay readable.</p>
+
+<div class="mermaid">
+%%{init: {"theme": "dark", "themeVariables": {"fontSize": "15.0px", "fontFamily": "Segoe UI, system-ui, sans-serif", "primaryColor": "#1e293b", "primaryTextColor": "#e2e8f0", "primaryBorderColor": "#38bdf8", "secondaryColor": "#0f172a", "tertiaryColor": "#334155", "lineColor": "#64748b", "textColor": "#e2e8f0"}, "flowchart": {"htmlLabels": true, "curve": "basis", "nodeSpacing": 48, "rankSpacing": 64, "padding": 14, "diagramPadding": 10, "useMaxWidth": true}}}%%
+flowchart LR
+    %% Section: Tests &amp; Fixtures (75 nodes, 116 edges)
     subgraph tests_fixtures_energy_collector_core_buffer_py_20e46d78["energy-collector/core/buffer.py"]
         energy_collector_core_buffer_ringbuffer_6c52be8f("RingBuffer<br/><small>energy-collector/core/buffer.py</small>")
         energy_collector_core_buffer_ringbuffer_init_00bbc0fd("__init__()<br/><small>energy-collector/core/buffer.py</small>")
@@ -1210,6 +1527,13 @@ flowchart LR
         energy_collector_core_buffer_ringbuffer_push_06f6547e("push()<br/><small>energy-collector/core/buffer.py</small>")
         energy_collector_core_buffer_ringbuffer_snapshot_3a15f7dc("snapshot()<br/><small>energy-collector/core/buffer.py</small>")
     end
+    subgraph tests_fixtures_core_hardware_modbus_backend_py_781045a2["core/hardware/modbus_backend.py"]
+        energy_collector_core_hardware_modbus_backend_mo_34b8a501("MockModbusBackend<br/><small>core/hardware/modbus_backend.py</small>")
+        energy_collector_core_hardware_modbus_backend_py_0d939f68("PymodbusBackend<br/><small>core/hardware/modbus_backend.py</small>")
+        energy_collector_core_hardware_modbus_backend_mo_a85a5423("ModbusBackend<br/><small>core/hardware/modbus_backend.py</small>")
+        energy_collector_core_hardware_modbus_backend_mo_594dc3f9("ModbusReadError<br/><small>core/hardware/modbus_backend.py</small>")
+        energy_collector_core_hardware_modbus_backend_mo_802ea5e6("read_holding_registers()<br/><small>core/hardware/modbus_backend.py</small>")
+    end
     subgraph tests_fixtures_energy_collector_config_settings_7e4f3613["energy-collector/config/settings.py"]
         energy_collector_config_settings_meterconfig_e8781d37("MeterConfig<br/><small>energy-collector/config/settings.py</small>")
         energy_collector_config_settings_meterconfig_is_8484df73("is_energy()<br/><small>energy-collector/config/settings.py</small>")
@@ -1217,15 +1541,8 @@ flowchart LR
         energy_collector_config_settings_registerdef_fdd5e777("RegisterDef<br/><small>energy-collector/config/settings.py</small>")
         energy_collector_config_settings_registerdef_par_c3375e12("_parse_address()<br/><small>energy-collector/config/settings.py</small>")
     end
-    subgraph tests_fixtures_core_hardware_modbus_backend_py_781045a2["core/hardware/modbus_backend.py"]
-        energy_collector_core_hardware_modbus_backend_mo_34b8a501("MockModbusBackend<br/><small>core/hardware/modbus_backend.py</small>")
-        energy_collector_core_hardware_modbus_backend_py_0d939f68("PymodbusBackend<br/><small>core/hardware/modbus_backend.py</small>")
-        energy_collector_core_hardware_modbus_backend_mo_594dc3f9("ModbusReadError<br/><small>core/hardware/modbus_backend.py</small>")
-        energy_collector_core_hardware_modbus_backend_mo_802ea5e6("read_holding_registers()<br/><small>core/hardware/modbus_backend.py</small>")
-    end
-    energy_collector_core_init_b223879c("__init__.py")
-    energy_collector_core_modbus_client_modbuspoller_b3af3315("ModbusPoller<br/><small>energy-collector/core/modbus_client.py</small>")
     energy_collector_core_redis_publisher_redispubli_ca9fd023("RedisPublisher<br/><small>energy-collector/core/redis_publisher.py</small>")
+    energy_collector_models_meter_reading_meterreadi_a1570012("MeterReading<br/><small>energy-collector/models/meter_reading.py</small>")
     energy_collector_config_settings_meterconfig_e8781d37 -->|method| energy_collector_config_settings_meterconfig_is_8484df73
     energy_collector_config_settings_meterconfig_e8781d37 -->|method| energy_collector_config_settings_meterconfig_is_93516989
     energy_collector_config_settings_registerdef_fdd5e777 -->|method| energy_collector_config_settings_registerdef_par_c3375e12
@@ -1236,28 +1553,25 @@ flowchart LR
     energy_collector_core_buffer_ringbuffer_6c52be8f -->|method| energy_collector_core_buffer_ringbuffer_snapshot_3a15f7dc
     energy_collector_core_hardware_modbus_backend_mo_594dc3f9 -->|calls| energy_collector_core_hardware_modbus_backend_mo_802ea5e6
     energy_collector_core_hardware_modbus_backend_mo_34b8a501 -->|method| energy_collector_core_hardware_modbus_backend_mo_802ea5e6
-    energy_collector_core_init_b223879c -->|imports| energy_collector_core_buffer_ringbuffer_6c52be8f
-    energy_collector_core_init_b223879c -->|imports| energy_collector_core_modbus_client_modbuspoller_b3af3315
-    energy_collector_core_init_b223879c -->|imports| energy_collector_core_redis_publisher_redispubli_ca9fd023
-    %% Omitted for readability: 81 nodes, 0 edges
+    %% Omitted for readability: 57 nodes, 0 edges
     class energy_collector_core_buffer_ringbuffer_6c52be8f klass;
     class energy_collector_core_buffer_ringbuffer_init_00bbc0fd function;
     class energy_collector_core_buffer_ringbuffer_latest_e7d4f320 function;
     class energy_collector_core_buffer_ringbuffer_len_d917241c function;
     class energy_collector_core_buffer_ringbuffer_push_06f6547e function;
     class energy_collector_core_buffer_ringbuffer_snapshot_3a15f7dc function;
+    class energy_collector_core_hardware_modbus_backend_mo_34b8a501 klass;
+    class energy_collector_core_hardware_modbus_backend_py_0d939f68 klass;
+    class energy_collector_core_hardware_modbus_backend_mo_a85a5423 klass;
+    class energy_collector_core_hardware_modbus_backend_mo_594dc3f9 klass;
+    class energy_collector_core_hardware_modbus_backend_mo_802ea5e6 function;
     class energy_collector_config_settings_meterconfig_e8781d37 klass;
     class energy_collector_config_settings_meterconfig_is_8484df73 function;
     class energy_collector_config_settings_meterconfig_is_93516989 function;
     class energy_collector_config_settings_registerdef_fdd5e777 klass;
     class energy_collector_config_settings_registerdef_par_c3375e12 function;
-    class energy_collector_core_hardware_modbus_backend_mo_34b8a501 klass;
-    class energy_collector_core_hardware_modbus_backend_py_0d939f68 klass;
-    class energy_collector_core_hardware_modbus_backend_mo_594dc3f9 klass;
-    class energy_collector_core_hardware_modbus_backend_mo_802ea5e6 function;
-    class energy_collector_core_init_b223879c module;
-    class energy_collector_core_modbus_client_modbuspoller_b3af3315 klass;
     class energy_collector_core_redis_publisher_redispubli_ca9fd023 klass;
+    class energy_collector_models_meter_reading_meterreadi_a1570012 klass;
     classDef entry fill:#422006,stroke:#fbbf24,color:#fde68a,stroke-width:1px;
     classDef api fill:#450a0a,stroke:#f87171,color:#fee2e2,stroke-width:1px;
     classDef async fill:#2e1065,stroke:#a78bfa,color:#ede9fe,stroke-width:1px;
@@ -1284,7 +1598,7 @@ flowchart LR
   <td><code>MeterConfig</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>is_energy()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>is_utils()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>MockModbusBackend</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br>+4 more</td>
+  <td><code>is_energy()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>is_utils()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>MockModbusBackend</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br>+3 more</td>
   <td>Reads, resolves, or persists project configuration.</td>
 </tr>
 <tr>
@@ -1324,7 +1638,7 @@ flowchart LR
   <td><code>RegisterDef</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td>External entry / no inbound edge</td>
-  <td><code>_parse_address()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>MockModbusBackend</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br><code>ModbusBackend</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br>+4 more</td>
+  <td><code>_parse_address()</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>MockModbusBackend</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br><code>ModbusBackend</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br>+3 more</td>
   <td>RegisterDef node in energy-collector/config/settings.py.</td>
 </tr>
 <tr>
@@ -1404,7 +1718,7 @@ flowchart LR
   <td><code>ModbusReadError</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>MeterConfig</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>RegisterDef</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><code>ModbusPoller</code><br><small style="color:var(--muted)">energy-collector/core/modbus_client.py</small><br><code>read_holding_registers()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br><code>read_holding_registers()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small></td>
+  <td><code>read_holding_registers()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br><code>read_holding_registers()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small></td>
   <td>ModbusReadError node in core/hardware/modbus_backend.py.</td>
 </tr>
 <tr>
@@ -1420,7 +1734,7 @@ flowchart LR
   <td><code>ModbusBackend</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small></td>
   <td><span class="tag tag-class">Class</span></td>
   <td><code>__init__.py</code><br><small style="color:var(--muted)">core/hardware/__init__.py</small><br><code>MeterConfig</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small><br><code>RegisterDef</code><br><small style="color:var(--muted)">energy-collector/config/settings.py</small></td>
-  <td><code>close()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br><code>connect()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br><code>connected()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br>+2 more</td>
+  <td><code>close()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br><code>connect()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br><code>connected()</code><br><small style="color:var(--muted)">core/hardware/modbus_backend.py</small><br>+1 more</td>
   <td>ModbusBackend node in core/hardware/modbus_backend.py.</td>
 </tr>
 <tr>
@@ -1527,24 +1841,24 @@ flowchart LR
     <table style="width:100%;font-size:0.85rem;">
       <tr><th>File</th><th>Coverage</th></tr>
       <tr><td><code>core/hardware/modbus_backend.py</code></td><td>29 nodes</td></tr>
-<tr><td><code>energy-collector/core/modbus_client.py</code></td><td>18 nodes</td></tr>
-<tr><td><code>energy-collector/core/redis_publisher.py</code></td><td>12 nodes</td></tr>
-<tr><td><code>energy-collector/core/buffer.py</code></td><td>10 nodes</td></tr>
-<tr><td><code>energy-collector/models/meter_reading.py</code></td><td>9 nodes</td></tr>
+<tr><td><code>energy-collector/core/redis_publisher.py</code></td><td>10 nodes</td></tr>
 <tr><td><code>energy-collector/config/settings.py</code></td><td>8 nodes</td></tr>
+<tr><td><code>energy-collector/core/buffer.py</code></td><td>8 nodes</td></tr>
+<tr><td><code>energy-collector/models/meter_reading.py</code></td><td>7 nodes</td></tr>
 <tr><td><code>energy-collector/core/register_parser.py</code></td><td>3 nodes</td></tr>
 <tr><td><code>core/hardware/__init__.py</code></td><td>2 nodes</td></tr>
+<tr><td><code>energy-collector/core/gpio_handler.py</code></td><td>1 nodes</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Design Notes</h4>
-    <p>This section comes from graphify community clustering. Relationship summary: method x45, explains x26, references x24, calls x23. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
+    <p>This section comes from graphify community clustering. Relationship summary: method x35, references x23, explains x17, calls x13. The diagram prioritizes high-confidence calls or usage relationships; the table keeps the broader node inventory.</p>
   </div>
 </div>
 <hr>
 
-<!-- ====== 7. Module Detail ====== -->
-<h2 id="module-detail">7. Module Detail</h2>
+<!-- ====== 8. Module Detail ====== -->
+<h2 id="module-detail">8. Module Detail</h2>
 <p>Module Detail groups implementation around planmd, meter, gpio, config, mostly in plan.md. This section covers 27 nodes and 26 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -1859,8 +2173,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 8. Database ====== -->
-<h2 id="database">8. Database</h2>
+<!-- ====== 9. Database ====== -->
+<h2 id="database">9. Database</h2>
 <p>Database groups implementation around dbpy, energy, collector, insert, mostly in energy-collector/core/db.py. This section covers 18 nodes and 31 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -2110,8 +2424,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 9. Application ====== -->
-<h2 id="application">9. Application</h2>
+<!-- ====== 10. Application ====== -->
+<h2 id="application">10. Application</h2>
 <p>Application groups implementation around read, readerpy, poll, target, mostly in read_reader.py. This section covers 3 nodes and 3 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -2187,8 +2501,8 @@ flowchart LR
 </div>
 <hr>
 
-<!-- ====== 10. gpio_reader.py ====== -->
-<h2 id="gpio-reader-py">10. gpio_reader.py</h2>
+<!-- ====== 11. gpio_reader.py ====== -->
+<h2 id="gpio-reader-py">11. gpio_reader.py</h2>
 <p>gpio_reader.py groups implementation around gpio, readerpy, mostly in gpio_reader.py. This section covers 1 nodes and 0 internal edges; the diagram shows only representative relationships to stay readable.</p>
 
 <div class="mermaid">
@@ -2249,17 +2563,17 @@ flowchart LR
   <div class="card">
     <h4>Graph</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>Nodes</td><td>240</td></tr>
-      <tr><td>Edges</td><td>422</td></tr>
+      <tr><td>Nodes</td><td>242</td></tr>
+      <tr><td>Edges</td><td>424</td></tr>
       <tr><td>Hyperedges</td><td>0</td></tr>
-      <tr><td>Communities</td><td>12</td></tr>
-      <tr><td>Documented Sections</td><td>9</td></tr>
+      <tr><td>Communities</td><td>13</td></tr>
+      <tr><td>Documented Sections</td><td>10</td></tr>
     </table>
   </div>
   <div class="card">
     <h4>Edge Confidence</h4>
     <table style="width:100%;font-size:0.85rem;">
-      <tr><td>EXTRACTED</td><td>377</td></tr>
+      <tr><td>EXTRACTED</td><td>379</td></tr>
       <tr><td>INFERRED</td><td>45</td></tr>
       <tr><td>AMBIGUOUS</td><td>0</td></tr>
     </table>
@@ -2268,7 +2582,7 @@ flowchart LR
 
 <div style="text-align:center; padding:40px 0; color: var(--muted); font-size:0.9rem;">
   <p>05_Collecting Data — Architecture Documentation</p>
-  <p>Generated: 2026-08-12 07:07 UTC · graphify callflow-html</p>
+  <p>Generated: 2026-08-20 07:36 UTC · graphify callflow-html</p>
 </div>
 
 </div><!-- .container -->

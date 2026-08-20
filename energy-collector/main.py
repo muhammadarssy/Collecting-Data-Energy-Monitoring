@@ -3,7 +3,8 @@
 Orkestrasi: load config → init GPIO/DB → spawn session per meter →
 polling task → tangani shutdown bersih (SIGINT/SIGTERM).
 
-Session per meter hidup dari start sampai shutdown; GPIO energy hanya cycle.
+Session per meter hidup dari start sampai shutdown.
+GPIO energy hanya cycle; di Windows / ENABLE_GPIO=false GPIO dilewati.
 """
 from __future__ import annotations
 
@@ -75,7 +76,10 @@ class Application:
 
         # 1. Load config
         try:
-            meters = load_meters(s.resolve_path(s.meters_config_path))
+            meters = load_meters(
+                s.resolve_path(s.meters_config_path),
+                require_gpio=s.gpio_enabled,
+            )
             register_map = load_registers(s.resolve_path(s.register_map_path))
         except Exception as exc:
             log.error("config_invalid", error=str(exc))
@@ -83,6 +87,7 @@ class Application:
 
         energy_meters = [m for m in meters if m.is_energy]
         utils_meters = [m for m in meters if m.is_utils]
+        use_gpio = s.gpio_enabled and bool(energy_meters)
 
         log.info(
             "config_loaded",
@@ -93,12 +98,24 @@ class Application:
             poll_interval_ms=s.poll_interval_ms,
             cycle_timeout_seconds=s.cycle_timeout_seconds,
             utils_history_interval_seconds=s.utils_history_interval_seconds,
+            gpio_enabled=s.gpio_enabled,
+            gpio_source=(
+                "env"
+                if s.enable_gpio is not None
+                else ("auto-windows-off" if sys.platform == "win32" else "auto-linux-on")
+            ),
         )
 
-        # 2. GPIO hanya jika ada meter energy
-        if energy_meters:
+        # 2. GPIO hanya jika diaktifkan dan ada meter energy
+        if use_gpio:
             init_gpio()
             self._gpio_initialized = True
+        elif energy_meters and not s.gpio_enabled:
+            log.info(
+                "gpio_skipped",
+                reason="ENABLE_GPIO=false atau auto-off di Windows",
+                hint="history tetap tiap UTILS_HISTORY_INTERVAL_SECONDS, tanpa production_cycles",
+            )
 
         # 3. DB (opsional — kalau gagal connect, jalan tanpa DB / buffer-only)
         self.db = Database(s.db_url)
@@ -140,7 +157,7 @@ class Application:
                 await self.db.start_session(meter.id, session_id, session_start)
             log.info("session_start", meter_id=meter.id, session_id=session_id)
 
-            if meter.is_energy:
+            if meter.is_energy and use_gpio:
                 handler = GPIOHandler(
                     meter=meter,
                     session_id=session_id,

@@ -4,7 +4,8 @@ Tiap cycle (default 500ms): baca 2 blok register, parse jadi MeterReading,
 push ke ring buffer + Redis (selalu).
 
 Persist PostgreSQL: snapshot tiap UTILS_HISTORY_INTERVAL_SECONDS dengan
-session_id lifetime aplikasi (tanpa cycle_id). GPIO hanya track cycle.
+session_id lifetime aplikasi (tanpa cycle_id). GPIO (jika ENABLE_GPIO)
+hanya track cycle; di Windows / ENABLE_GPIO=false gpio_handler=None.
 """
 from __future__ import annotations
 
