@@ -66,7 +66,7 @@ meters:
   - id: utils_id6
     label: "Panel Utilitas 6"
     type: utils
-    port: /dev/ttyACM2
+    port: /dev/ttyACM5
     baudrate: 9600
     slave_id: 6
     parity: N
