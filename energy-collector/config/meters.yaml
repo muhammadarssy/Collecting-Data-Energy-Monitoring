@@ -5,7 +5,7 @@ meters:
   - id: meter_id1
     label: "Mesin Injeksi 1"
     type: energy
-    port: /dev/ttyACM4
+    port: /dev/ttyACM0
     baudrate: 9600
     slave_id: 1
     parity: N
@@ -31,7 +31,7 @@ meters:
   - id: meter_id3
     label: "Mesin Injeksi 3"
     type: energy
-    port: /dev/ttyACM6
+    port: /dev/ttyACM2
     baudrate: 9600
     slave_id: 3
     parity: N
@@ -44,7 +44,7 @@ meters:
   - id: meter_id4
     label: "Mesin Injeksi 4"
     type: energy
-    port: /dev/ttyACM7
+    port: /dev/ttyACM3
     baudrate: 9600
     slave_id: 4
     parity: N
@@ -57,7 +57,7 @@ meters:
   - id: utils_id5
     label: "Panel Utilitas 5"
     type: utils
-    port: /dev/ttyACM0
+    port: /dev/ttyACM4
     baudrate: 9600
     slave_id: 5
     parity: N
@@ -66,7 +66,7 @@ meters:
   - id: utils_id6
     label: "Panel Utilitas 6"
     type: utils
-    port: /dev/ttyACM1
+    port: /dev/ttyACM2
     baudrate: 9600
     slave_id: 6
     parity: N
