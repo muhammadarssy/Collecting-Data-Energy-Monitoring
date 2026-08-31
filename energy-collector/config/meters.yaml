@@ -15,18 +15,18 @@ meters:
     gpio_noise_delay_ms: 1000
     gpio_standby_low_seconds: 30
 
-  # - id: meter_id2
-  #   label: "Mesin Injeksi 2"
-  #   type: energy
-  #   port: /dev/ttyACM2
-  #   baudrate: 9600
-  #   slave_id: 2
-  #   parity: N
-  #   stopbits: 1
-  #   gpio_pin: 22
-  #   gpio_debounce_ms: 500
-  #   gpio_noise_delay_ms: 1000
-  #   gpio_standby_low_seconds: 30
+  - id: meter_id2
+    label: "Mesin Injeksi 2"
+    type: energy
+    port: /dev/ttyACM1
+    baudrate: 9600
+    slave_id: 2
+    parity: N
+    stopbits: 1
+    gpio_pin: 22
+    gpio_debounce_ms: 500
+    gpio_noise_delay_ms: 1000
+    gpio_standby_low_seconds: 30
 
   - id: meter_id3
     label: "Mesin Injeksi 3"
