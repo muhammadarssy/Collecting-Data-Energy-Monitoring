@@ -5,14 +5,15 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-User=pi
-Group=pi
-# Akses GPIO di Raspberry Pi
-SupplementaryGroups=gpio
+# Nilai User/Group/path diisi ulang oleh deploy/install-service.sh
+User=collector
+Group=collector
+# Jangan hardcode gpio: grup itu tidak ada di mini PC Linux dan service gagal start.
+# install-service.sh menambahkan SupplementaryGroups=gpio dan/atau dialout jika ada.
 
 WorkingDirectory=/opt/energy-collector
 EnvironmentFile=-/opt/energy-collector/.env
-ExecStart=/opt/energy-collector/.venv/bin/python main.py
+ExecStart=/opt/energy-collector/.venv/bin/python /opt/energy-collector/main.py
 
 # Restart otomatis kalau crash; SIGTERM dari systemd ditangani di main.py
 Restart=on-failure

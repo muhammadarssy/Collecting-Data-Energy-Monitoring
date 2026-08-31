@@ -60,10 +60,11 @@ class Application:
         self._loop: Optional[asyncio.AbstractEventLoop] = None
         self._shutdown = asyncio.Event()
         self._gpio_initialized = False
+        self._outbox_task: Optional[asyncio.Task] = None
 
     # ── Hook DB dari thread GPIO → schedule ke event loop ────
     def _schedule(self, coro_factory, *args) -> None:
-        if self.db is None or not self.db.ready or self._loop is None:
+        if self.db is None or self._loop is None:
             return
         try:
             asyncio.run_coroutine_threadsafe(coro_factory(*args), self._loop)
@@ -117,13 +118,18 @@ class Application:
                 hint="history tetap tiap UTILS_HISTORY_INTERVAL_SECONDS, tanpa production_cycles",
             )
 
-        # 3. DB (opsional — kalau gagal connect, jalan tanpa DB / buffer-only)
-        self.db = Database(s.db_url)
-        try:
-            await self.db.connect()
-        except Exception as exc:
-            log.warning("db_unavailable_running_bufferonly", error=str(exc))
-            self.db = None
+        # 3. DB — kalau PG mati, tulis ke spool lokal lalu flush saat up
+        self.db = Database(s.db_url, spool_path=s.resolve_path(s.spool_path))
+        if not await self.db.connect():
+            log.warning(
+                "db_unavailable_spooling",
+                spool_path=s.resolve_path(s.spool_path).as_posix(),
+                spool_depth=self.db.spool_depth,
+            )
+        else:
+            n = await self.db.flush_outbox()
+            if n:
+                log.info("spool_flushed_startup", count=n, remaining=self.db.spool_depth)
 
         # 3b. Redis (opsional — mirror buffer & device info untuk service API)
         if s.redis_url:
@@ -187,12 +193,17 @@ class Application:
             "startup_complete",
             meters=[{"id": m.id, "type": m.device_type} for m in meters],
             gpio_enabled=self._gpio_initialized,
-            db_enabled=self.db is not None,
+            db_enabled=self.db is not None and self.db.ready,
+            spool_depth=self.db.spool_depth if self.db is not None else 0,
             redis_enabled=self.redis is not None and self.redis.ready,
             collector_id=s.collector_id.strip() or None,
         )
 
         # 5. Jalankan semua poller sampai shutdown
+        self._outbox_task = asyncio.create_task(
+            self.db.run_outbox(s.spool_flush_interval_seconds),
+            name="db-outbox",
+        )
         tasks = [asyncio.create_task(p.run(), name=f"poller-{p.meter.id}") for p in self.pollers]
         await self._shutdown.wait()
 
@@ -229,7 +240,20 @@ class Application:
 
         if self.redis is not None:
             await self.redis.close()
+        if self._outbox_task is not None:
+            self._outbox_task.cancel()
+            try:
+                await self._outbox_task
+            except asyncio.CancelledError:
+                pass
+            self._outbox_task = None
         if self.db is not None:
+            if await self.db.ensure_connected():
+                n = await self.db.flush_outbox()
+                if n:
+                    log.info("spool_flushed_shutdown", count=n, remaining=self.db.spool_depth)
+            elif self.db.spool_depth:
+                log.warning("spool_left_on_disk", depth=self.db.spool_depth)
             await self.db.close()
 
     def request_shutdown(self, signame: str) -> None:

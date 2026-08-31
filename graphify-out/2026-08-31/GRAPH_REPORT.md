@@ -1,12 +1,12 @@
-# Graph Report - 05_Collecting Data  (2026-08-20)
+# Graph Report - 05_Collecting Data  (2026-08-26)
 
 ## Corpus Check
-- 20 files · ~12,016 words
+- 21 files · ~13,105 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 245 nodes · 430 edges · 13 communities (11 shown, 2 thin omitted)
-- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 45 edges (avg confidence: 0.59)
+- 261 nodes · 457 edges · 15 communities (13 shown, 2 thin omitted)
+- Extraction: 90% EXTRACTED · 10% INFERRED · 0% AMBIGUOUS · INFERRED: 46 edges (avg confidence: 0.59)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
@@ -27,6 +27,8 @@
 - Storage Schema — Redis & PostgreSQL
 - Application
 - Application
+- migrasi.py
+- register_parser.py
 
 ## God Nodes (most connected - your core abstractions)
 1. `GPIOHandler` - 29 edges
@@ -55,31 +57,31 @@
 ## Import Cycles
 - None detected.
 
-## Communities (13 total, 2 thin omitted)
+## Communities (15 total, 2 thin omitted)
 
 ### Community 0 - "GPIOHandler"
-Cohesion: 0.10
-Nodes (15): cleanup_gpio(), _gpio_setup_hints(), GPIOHandler, init_gpio(), _new_id(), _now(), datetime, State machine cycle per pin GPIO (per meter).  Optocoupler open-collector: pin d (+7 more)
+Cohesion: 0.14
+Nodes (9): _gpio_setup_hints(), GPIOHandler, _now(), datetime, LOW: mulai cycle dari IDLE, atau batalkan end-timer (noise HIGH singkat)., HIGH: jika noise → end-timer; jika abort wait → standby IDLE., HIGH stabil cukup lama → 1 cycle selesai., LOW terus-menerus terlalu lama → mesin mati, abort cycle. (+1 more)
 
 ### Community 1 - "MeterConfig"
 Cohesion: 0.07
-Nodes (24): ABC, BaseModel, CycleCloseHook, CycleOpenHook, MeterConfig, Konfigurasi satu meter dari `meters.yaml`.      `type` / `device_type`:       -, Definisi satu register dari `registers.yaml`., RegisterDef (+16 more)
+Nodes (24): ABC, BaseModel, CycleCloseHook, CycleOpenHook, MeterConfig, Definisi satu register dari `registers.yaml`., Konfigurasi satu meter dari `meters.yaml`.      `type` / `device_type`:       -, RegisterDef (+16 more)
 
 ### Community 2 - "MeterReading"
-Cohesion: 0.09
-Nodes (14): Ring buffer per meter untuk konsumsi frontend (live view).  Selalu menerima samp, Buffer FIFO thread-safe berbasis `deque(maxlen=...)`.      Sample tertua otomati, Salinan isi buffer (tidak mengosongkan buffer)., RingBuffer, Polling loop Modbus per meter (asyncio task).  Tiap cycle (default 500ms): baca, Publish sample buffer & device info ke Redis untuk konsumsi service API terpisah, Async Redis client untuk mirror ring buffer & device info., RedisPublisher (+6 more)
+Cohesion: 0.10
+Nodes (10): Buffer FIFO thread-safe berbasis `deque(maxlen=...)`.      Sample tertua otomati, Salinan isi buffer (tidak mengosongkan buffer)., RingBuffer, Async Redis client untuk mirror ring buffer & device info., RedisPublisher, _serialize_reading(), MeterReading, Satu sample pembacaan dari satu meter.      Live (buffer/Redis): session_id life (+2 more)
 
 ### Community 3 - "Database"
-Cohesion: 0.20
-Nodes (6): _as_uuid(), Database, datetime, Lapisan PostgreSQL via asyncpg.  - Insert per sample (real-time, bukan batch) sa, Wrapper connection pool asyncpg., UUID
+Cohesion: 0.26
+Nodes (4): _as_uuid(), Database, datetime, Wrapper connection pool asyncpg.
 
 ### Community 4 - "settings.py"
-Cohesion: 0.15
-Nodes (15): BaseSettings, _assert_unique(), get_settings(), is_raspberry_pi(), load_meters(), load_registers(), Konfigurasi global aplikasi.  Parameter dibaca dari environment / file `.env` vi, Muat daftar meter dari YAML. Raise kalau file/format invalid.      require_gpio: (+7 more)
+Cohesion: 0.16
+Nodes (13): BaseSettings, _assert_unique(), get_settings(), load_meters(), load_registers(), Konfigurasi global aplikasi.  Parameter dibaca dari environment / file `.env` vi, Muat daftar meter dari YAML. Raise kalau file/format invalid.      require_gpio:, Muat register map dari YAML. Raise kalau file/format invalid. (+5 more)
 
 ### Community 5 - "RedisPublisher"
-Cohesion: 0.25
-Nodes (7): apply_meter_conversion(), decode_register(), Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind, Ekstrak semua register yang alamatnya jatuh di dalam blok ini., Decode satu nilai dari list word mentah. Return None kalau gagal., Konversi raw → engineering sesuai rumus UrAt/IrAt.      U  = URMS × (UrAt×0.1)×0, _words_to_bytes()
+Cohesion: 0.15
+Nodes (11): Ring buffer per meter untuk konsumsi frontend (live view).  Selalu menerima samp, Lapisan PostgreSQL via asyncpg.  - Insert per sample (real-time, bukan batch) sa, _new_id(), State machine cycle per pin GPIO (per meter).  Optocoupler open-collector: pin d, State, Polling loop Modbus per meter (asyncio task).  Tiap cycle (default 500ms): baca, Publish sample buffer & device info ke Redis untuk konsumsi service API terpisah, Entry point Energy Meter Collection System.  Orkestrasi: load config → init GPIO (+3 more)
 
 ### Community 6 - "register_parser.py"
 Cohesion: 0.22
@@ -94,8 +96,16 @@ Cohesion: 0.13
 Nodes (14): 0. Tipe Device (`device_type`), 1.1 Pola Key, 1.2 `latest` (String) & `readings` (List), 1.3 `device_info` (Hash), 1.4 Contoh Akses (untuk Endpoint), 1. Redis, 2.1 Tabel `meter_readings`, 2.2 Tabel `production_sessions` (+6 more)
 
 ### Community 12 - "Application"
-Cohesion: 0.22
-Nodes (6): _amain(), Application, main(), Entry point Energy Meter Collection System.  Orkestrasi: load config → init GPIO, Konfigurasi structlog → output JSON ke stdout., setup_logging()
+Cohesion: 0.19
+Nodes (7): cleanup_gpio(), init_gpio(), _amain(), Application, main(), Konfigurasi structlog → output JSON ke stdout., setup_logging()
+
+### Community 13 - "migrasi.py"
+Cohesion: 0.21
+Nodes (17): Any, ArgumentParser, Connection, build_parser(), _chunks(), _insert_rows(), _insert_sql(), main() (+9 more)
+
+### Community 14 - "register_parser.py"
+Cohesion: 0.25
+Nodes (7): apply_meter_conversion(), decode_register(), Decode raw Modbus register (list 16-bit words) menjadi nilai numerik.  Versi-ind, Ekstrak semua register yang alamatnya jatuh di dalam blok ini., Decode satu nilai dari list word mentah. Return None kalau gagal., Konversi raw → engineering sesuai rumus UrAt/IrAt.      U  = URMS × (UrAt×0.1)×0, _words_to_bytes()
 
 ## Knowledge Gaps
 - **35 isolated node(s):** `install-service.sh script`, `0. Tipe Device (`device_type`)`, `1.1 Pola Key`, `1.2 `latest` (String) & `readings` (List)`, `1.3 `device_info` (Hash)` (+30 more)
@@ -105,12 +115,12 @@ Nodes (6): _amain(), Application, main(), Entry point Energy Meter Collection Sy
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `ModbusPoller` connect `register_parser.py` to `GPIOHandler`, `MeterConfig`, `MeterReading`, `Application`?**
-  _High betweenness centrality (0.176) - this node is a cross-community bridge._
-- **Why does `GPIOHandler` connect `GPIOHandler` to `MeterConfig`, `MeterReading`, `Application`, `register_parser.py`?**
-  _High betweenness centrality (0.161) - this node is a cross-community bridge._
-- **Why does `MeterConfig` connect `MeterConfig` to `GPIOHandler`, `settings.py`, `register_parser.py`?**
-  _High betweenness centrality (0.103) - this node is a cross-community bridge._
+- **Why does `ModbusPoller` connect `register_parser.py` to `GPIOHandler`, `MeterConfig`, `MeterReading`, `RedisPublisher`, `Application`?**
+  _High betweenness centrality (0.153) - this node is a cross-community bridge._
+- **Why does `GPIOHandler` connect `GPIOHandler` to `MeterConfig`, `Application`, `RedisPublisher`, `register_parser.py`?**
+  _High betweenness centrality (0.140) - this node is a cross-community bridge._
+- **Why does `MeterConfig` connect `MeterConfig` to `GPIOHandler`, `settings.py`, `RedisPublisher`, `register_parser.py`?**
+  _High betweenness centrality (0.087) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `GPIOHandler` (e.g. with `MeterConfig` and `ModbusPoller`) actually correct?**
   _`GPIOHandler` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 12 inferred relationships involving `ModbusPoller` (e.g. with `MeterConfig` and `RegisterDef`) actually correct?**

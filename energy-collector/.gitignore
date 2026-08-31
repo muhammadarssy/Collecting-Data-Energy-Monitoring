@@ -6,3 +6,7 @@ venv/
 .env
 *.log
 .pytest_cache/
+data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

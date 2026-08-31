@@ -5,7 +5,8 @@ PyYAML>=6.0
 structlog>=24.1
 redis>=5.0
 pyserial==3.5
-RPi.GPIO==0.7.1; sys_platform == "linux"
+# Hanya ARM (Raspberry Pi). Mini PC x86_64 jangan install paket ini.
+RPi.GPIO==0.7.1; sys_platform == "linux" and (platform_machine == "armv7l" or platform_machine == "aarch64")
 
 # GPIO — rpi-lgpio adalah drop-in replacement RPi.GPIO (import tetap sama).
 # Wajib di Pi OS Bookworm / kernel 6.6+; RPi.GPIO klasik gagal add_event_detect.

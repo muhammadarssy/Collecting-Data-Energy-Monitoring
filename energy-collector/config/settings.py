@@ -32,6 +32,11 @@ class Settings(BaseSettings):
         default="postgresql://user:pass@localhost:5432/energy_db",
         alias="DB_URL",
     )
+    # Outbox lokal (SQLite) jika PostgreSQL mati / timeout. Flush otomatis saat DB up.
+    spool_path: str = Field(default="data/outbox.sqlite", alias="SPOOL_PATH")
+    spool_flush_interval_seconds: float = Field(
+        default=10.0, alias="SPOOL_FLUSH_INTERVAL_SECONDS"
+    )
     buffer_maxlen: int = Field(default=240, alias="BUFFER_MAXLEN")
     cycle_timeout_seconds: float = Field(default=300.0, alias="CYCLE_TIMEOUT_SECONDS")
     poll_interval_ms: int = Field(default=500, alias="POLL_INTERVAL_MS")

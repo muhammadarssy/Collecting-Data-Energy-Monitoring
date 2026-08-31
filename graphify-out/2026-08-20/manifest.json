@@ -5,8 +5,8 @@
     "semantic_hash": "d10a451beab1a24a71a6c25c75631f07"
   },
   "energy-collector/config/settings.py": {
-    "mtime": 1785980637.960882,
-    "ast_hash": "4c2fb3a0b48544e0af95512e3de48cc0",
+    "mtime": 1787214638.3210907,
+    "ast_hash": "1b47f3ab023b583c530bf70b1013fcf1",
     "semantic_hash": ""
   },
   "energy-collector/core/__init__.py": {
@@ -25,8 +25,8 @@
     "semantic_hash": ""
   },
   "energy-collector/core/gpio_handler.py": {
-    "mtime": 1785124523.250728,
-    "ast_hash": "329b22adc5ac9c24000bcac8f0c7255b",
+    "mtime": 1787211369.3476672,
+    "ast_hash": "9bc6c80f1473baaa2ae13e96abb2c764",
     "semantic_hash": ""
   },
   "energy-collector/core/hardware/__init__.py": {
@@ -40,8 +40,8 @@
     "semantic_hash": ""
   },
   "energy-collector/core/modbus_client.py": {
-    "mtime": 1786502285.5490901,
-    "ast_hash": "1be6f090d54c2a82606d46561a43bc9a",
+    "mtime": 1787211371.1027765,
+    "ast_hash": "3c1239b72a37c5c1c936a947f4954f7b",
     "semantic_hash": ""
   },
   "energy-collector/core/redis_publisher.py": {
@@ -55,8 +55,8 @@
     "semantic_hash": ""
   },
   "energy-collector/main.py": {
-    "mtime": 1785980638.004168,
-    "ast_hash": "00c4588b45fe0280704d158b8c8c2207",
+    "mtime": 1787214638.0962718,
+    "ast_hash": "137a462caa97785962ad883493efd7d3",
     "semantic_hash": ""
   },
   "energy-collector/models/__init__.py": {
@@ -95,8 +95,8 @@
     "semantic_hash": ""
   },
   "energy-collector/requirements.txt": {
-    "mtime": 1782802824.6065125,
-    "ast_hash": "40026ea8917e65728b4bc721ea076e43",
+    "mtime": 1787211354.6163297,
+    "ast_hash": "224d8aea4ae722ea052cd3b513154356",
     "semantic_hash": ""
   },
   "plan.md": {
@@ -110,8 +110,8 @@
     "semantic_hash": ""
   },
   "read_reader.py": {
-    "mtime": 1786518434.008437,
-    "ast_hash": "85b8ebcb04dc43a5501edf94987de548",
+    "mtime": 1786518796.0977125,
+    "ast_hash": "15318709d2dcab768a4653d9b0828623",
     "semantic_hash": ""
   }
 }
